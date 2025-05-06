@@ -18,7 +18,8 @@ public class ShapeSaveLoadManager : MonoBehaviour
                 {
                     type = "Line",
                     position1 = line.StartPoint,
-                    position2 = line.EndPoint
+                    position2 = line.EndPoint,
+                    Color = line.Color,
                 });
             }
             else if (shape is Circle circle)
@@ -27,7 +28,8 @@ public class ShapeSaveLoadManager : MonoBehaviour
                 {
                     type = "Circle",
                     position1 = circle.CenterPoint,
-                    radius = circle.Radius
+                    radius = circle.Radius,
+                    Color = circle.Color
                 });
             }
             else if (shape is Ellipse ellipse)
@@ -37,7 +39,31 @@ public class ShapeSaveLoadManager : MonoBehaviour
                     type = "Ellipse",
                     position1 = ellipse.CenterPoint,
                     radiusX = ellipse.RadiusX,
-                    radiusY = ellipse.RadiusY
+                    radiusY = ellipse.RadiusY,
+                    Color = ellipse.Color
+                });
+            }
+            else if (shape is HermiteCurve hermite)
+            {
+                shapeDatas.Add(new ShapeData { 
+                    type = "Hermite",
+                    position1 = hermite.P0,
+                    position2 = hermite.P1,
+                    position3 = hermite.T0,
+                    position4 = hermite.T1,
+                    Color = hermite.Color
+                });
+            }
+            else if (shape is BezierCurve bezier)
+            {
+                shapeDatas.Add(new ShapeData
+                {
+                    type = "Bezier",
+                    position1 = bezier.P0,
+                    position2 = bezier.P1,
+                    position3 = bezier.P2,
+                    position4 = bezier.P3,
+                    Color = bezier.Color
                 });
             }
         }
@@ -59,14 +85,21 @@ public class ShapeSaveLoadManager : MonoBehaviour
             switch (data.type)
             {
                 case "Line":
-                    loadedShapes.Add(new Line(data.position1, data.position2, Color.black));
+                    loadedShapes.Add(new Line(data.position1, data.position2, data.Color));
                     break;
                 case "Circle":
-                    loadedShapes.Add(new Circle(data.position1, data.radius, Color.black));
+                    loadedShapes.Add(new Circle(data.position1, data.radius, data.Color));
                     break;
                 case "Ellipse":
-                    loadedShapes.Add(new Ellipse(data.position1, data.radiusX, data.radiusY, Color.black));
+                    loadedShapes.Add(new Ellipse(data.position1, data.radiusX, data.radiusY, data.Color));
                     break;
+                case "Hermite":
+                    loadedShapes.Add(new HermiteCurve(data.position1, data.position2, data.position3, data.position4, data.Color));
+                    break;
+                case "Bezier":
+                    loadedShapes.Add(new BezierCurve(data.position1, data.position2, data.position3, data.position4, data.Color));
+                    break;
+
             }
         }
 
@@ -91,8 +124,36 @@ public class ShapeSaveLoadManager : MonoBehaviour
         public string type;
         public Vector2 position1;
         public Vector2 position2;
+        public Vector2 position3;
+        public Vector2 position4;
         public int radius;
         public int radiusX;
         public int radiusY;
+
+        public string colorHex;
+
+        public Color Color
+        {
+            get => ColorFromHex(colorHex);
+            set => colorHex = ColorToHex(value);
+        }
+
+        private static string ColorToHex(Color color)
+        {
+            Color32 c32 = color;
+            return $"#{c32.r:X2}{c32.g:X2}{c32.b:X2}{c32.a:X2}";
+        }
+
+        private static Color ColorFromHex(string hex)
+        {
+            if (string.IsNullOrEmpty(hex) || hex.Length < 7) return Color.white;
+
+            byte r = byte.Parse(hex.Substring(1, 2), System.Globalization.NumberStyles.HexNumber);
+            byte g = byte.Parse(hex.Substring(3, 2), System.Globalization.NumberStyles.HexNumber);
+            byte b = byte.Parse(hex.Substring(5, 2), System.Globalization.NumberStyles.HexNumber);
+            byte a = hex.Length >= 9 ? byte.Parse(hex.Substring(7, 2), System.Globalization.NumberStyles.HexNumber) : (byte)255;
+
+            return new Color32(r, g, b, a);
+        }
     }
 }
