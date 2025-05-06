@@ -60,7 +60,13 @@ public class BezierCurve : Shape
 
     public override string GetDetails()
     {
-        return $"Bezier Curve from {P0} to {P3} with controls {P1}, {P2}";
+        return $"Bezier Curve from {Vector3ToIntString(P0)} to {Vector3ToIntString(P3)} with controls " +
+            $"{Vector3ToIntString(P1)}, {Vector3ToIntString(P2)}";
+    }
+
+    private string Vector3ToIntString(Vector3 vec)
+    {
+        return $"{(int)vec.x},{(int)vec.y},{(int)vec.z}";
     }
 
     public override Vector2 GetCenter()

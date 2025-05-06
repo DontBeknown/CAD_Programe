@@ -58,7 +58,7 @@ public class Circle : Shape
 
     public override string GetDetails()
     {
-        return $"Circle Center: {CenterPoint}, Radius: {Radius}";
+        return $"Circle Center: {CenterPoint:F0}, Radius: {Radius:F0}";
     }
 
     public override Vector2 GetCenter()

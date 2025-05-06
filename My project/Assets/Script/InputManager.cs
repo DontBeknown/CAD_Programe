@@ -18,7 +18,7 @@ public class InputManager : MonoBehaviour
     [Header("References")]
     [SerializeField] private TextMeshProUGUI coordinateText;
     [SerializeField] private TextMeshProUGUI displayText;
-
+    [SerializeField] private ShapeListUIManager shapeListUIManager;
     private InputMode currentMode = InputMode.Select;
     private string currentInput = "";
 
@@ -34,7 +34,7 @@ public class InputManager : MonoBehaviour
         grid = GetComponent<GridDraw>();
         shapeSaveLoadManager = GetComponent<ShapeSaveLoadManager>();
 
-        selectionManager = new SelectionManager(shapeSaveLoadManager);
+        selectionManager = new SelectionManager(shapeSaveLoadManager, shapeListUIManager);
         shapeDrawer = new ShapeDrawer();
         rotationController = new ShapeRotationController();
         shapeMover = new ShapeMover();

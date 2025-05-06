@@ -12,16 +12,19 @@ public class SelectionManager
     private Dictionary<GameObject, Shape> shapeRegistry = new Dictionary<GameObject, Shape>();
     private ShapeSaveLoadManager saveLoadManager;
 
-    public SelectionManager(ShapeSaveLoadManager saveLoadManager)
+    private ShapeListUIManager shapeListUIManager;
+    public SelectionManager(ShapeSaveLoadManager saveLoadManager,ShapeListUIManager shapeListUIManager)
     {
         Instance = this;
         this.saveLoadManager = saveLoadManager;
-    }
+        this.shapeListUIManager = shapeListUIManager;
+        }
     public void RegisterShape(GameObject obj, Shape shape)
     {
         if (!shapeRegistry.ContainsKey(obj))
         {
             shapeRegistry.Add(obj, shape);
+            shapeListUIManager.RefreshList(shapeRegistry);
         }
     }
     public void Select(GameObject obj)
@@ -56,6 +59,7 @@ public class SelectionManager
             if (shapeRegistry.ContainsKey(selectedObject))
             {
                 shapeRegistry.Remove(selectedObject);
+                shapeListUIManager.RefreshList(shapeRegistry);
             }
 
             DebugLogUI.Instance.Log($"Delete {selectedObject.name}");
@@ -80,6 +84,7 @@ public class SelectionManager
             return;
         }
         DebugLogUI.Instance.Log($"Loaded {loadedShape.Count} shapes.");
+        shapeListUIManager.RefreshList(shapeRegistry);
     }
 
     public bool HasSelection()

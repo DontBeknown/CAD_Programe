@@ -58,7 +58,7 @@ public class HermiteCurve : Shape
 
     public override string GetDetails()
     {
-        return $"Hermite Curve from {P0} to {P1} with tangents {T0}, {T1}";
+        return $"Hermite Curve from {P0:F0} to {P1:F0} with tangents {T0:F0}, {T1:F0}";
     }
 
     public override Vector2 GetCenter()

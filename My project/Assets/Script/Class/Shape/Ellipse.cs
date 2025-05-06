@@ -90,7 +90,7 @@ public class Ellipse : Shape
 
     public override string GetDetails()
     {
-        return $"Ellipse Center: {CenterPoint}, RadiusX: {RadiusX}, RadiusY: {RadiusY}";
+        return $"Ellipse Center: {CenterPoint:F0}, RadiusX: {RadiusX:F0}, RadiusY: {RadiusY:F0}";
     }
 
     public override Vector2 GetCenter()

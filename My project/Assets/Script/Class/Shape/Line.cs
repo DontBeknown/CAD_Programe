@@ -48,7 +48,7 @@ public class Line : Shape
 
     public override string GetDetails()
     {
-        return $"Line from {StartPoint} to {EndPoint}";
+        return $"Line from {StartPoint:F0} to {EndPoint:F0}";
     }
 
     public override Vector2 GetCenter()
