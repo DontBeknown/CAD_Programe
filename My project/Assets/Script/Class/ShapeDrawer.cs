@@ -49,17 +49,17 @@ public class ShapeDrawer
         DebugLogUI.Instance.Log($"Created line from {start} to {end}");
     }
 
-    public void DrawCircle(Vector2 center, int radius, Color color)
+    public void DrawCircle(Vector2 center, int radius, bool fill, Color color)
     {
-        var circle = new Circle(center, radius, color);
+        var circle = new Circle(center, radius, color, fill);
         SelectionManager.Instance.RegisterShape(circle.parentObject, circle);
         circle.Draw();
-        DebugLogUI.Instance.Log($"Created circle at {center} with radius {radius}");
+        DebugLogUI.Instance.Log($"Created circle at {center} with radius {radius} with fill {fill}");
     }
 
-    public void DrawEllipse(Vector2 center, int radiusX, int radiusY, Color color)
+    public void DrawEllipse(Vector2 center, int radiusX, int radiusY, bool fill, Color color)
     {
-        var ellipse = new Ellipse(center, radiusX, radiusY, color);
+        var ellipse = new Ellipse(center, radiusX, radiusY, color, fill);
         SelectionManager.Instance.RegisterShape(ellipse.parentObject, ellipse);
         ellipse.Draw();
         DebugLogUI.Instance.Log($"Created ellipse at {center} with radiusX={radiusX}, radiusY={radiusY}");
@@ -103,12 +103,12 @@ public class ShapeDrawer
                 break;
             case InputMode.DrawCircle:
                 int radius = Mathf.RoundToInt(Vector2.Distance(start, end));
-                DrawCircle(start, radius, color);
+                DrawCircle(start, radius, false, color);
                 break;
             case InputMode.DrawEllipse:
                 int radiusX = Mathf.Abs(Mathf.RoundToInt(end.x - start.x));
                 int radiusY = Mathf.Abs(Mathf.RoundToInt(end.y - start.y));
-                DrawEllipse(start, radiusX, radiusY, color);
+                DrawEllipse(start, radiusX, radiusY, false, color);
                 break;
         }
     }

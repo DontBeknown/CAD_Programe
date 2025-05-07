@@ -29,7 +29,8 @@ public class ShapeSaveLoadManager : MonoBehaviour
                     type = "Circle",
                     position1 = circle.CenterPoint,
                     radius = circle.Radius,
-                    Color = circle.Color
+                    Color = circle.Color,
+                    isFill = circle.Fill,
                 });
             }
             else if (shape is Ellipse ellipse)
@@ -88,10 +89,10 @@ public class ShapeSaveLoadManager : MonoBehaviour
                     loadedShapes.Add(new Line(data.position1, data.position2, data.Color));
                     break;
                 case "Circle":
-                    loadedShapes.Add(new Circle(data.position1, data.radius, data.Color));
+                    loadedShapes.Add(new Circle(data.position1, data.radius, data.Color, data.isFill));
                     break;
                 case "Ellipse":
-                    loadedShapes.Add(new Ellipse(data.position1, data.radiusX, data.radiusY, data.Color));
+                    loadedShapes.Add(new Ellipse(data.position1, data.radiusX, data.radiusY, data.Color, data.isFill));
                     break;
                 case "Hermite":
                     loadedShapes.Add(new HermiteCurve(data.position1, data.position2, data.position3, data.position4, data.Color));
@@ -129,6 +130,8 @@ public class ShapeSaveLoadManager : MonoBehaviour
         public int radius;
         public int radiusX;
         public int radiusY;
+
+        public bool isFill;
 
         public string colorHex;
 

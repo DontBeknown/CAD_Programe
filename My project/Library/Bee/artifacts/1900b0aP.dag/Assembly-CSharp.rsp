@@ -350,6 +350,7 @@
 -analyzer:"D:/Unity/UnityEditor/6000.1.0f1/Editor/Data/Tools/Unity.SourceGenerators/Unity.SourceGenerators.dll"
 -analyzer:"D:/Unity/UnityEditor/6000.1.0f1/Editor/Data/Tools/Unity.SourceGenerators/Unity.UIToolkit.SourceGenerator.dll"
 "Assets/Script/CameraControl.cs"
+"Assets/Script/Class/ColorToString.cs"
 "Assets/Script/Class/Command.cs"
 "Assets/Script/Class/SelectionManager.cs"
 "Assets/Script/Class/Shape/BezierCurve.cs"
@@ -368,6 +369,8 @@
 "Assets/Script/InputManager.cs"
 "Assets/Script/PixelPool.cs"
 "Assets/Script/ShapeSaveLoadManager.cs"
+"Assets/Script/UI/ShapeListItemUI.cs"
+"Assets/Script/UI/ShapeListUIManager.cs"
 -langversion:9.0
 /deterministic
 /optimize+

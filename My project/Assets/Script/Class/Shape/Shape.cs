@@ -159,7 +159,7 @@ public abstract class Shape
         }
     }
 
-    protected void UpdateAllPixelsColor(Color color)
+    protected virtual void UpdateAllPixelsColor(Color color)
     {
         foreach (GameObject pixel in drawnPixels)
         {

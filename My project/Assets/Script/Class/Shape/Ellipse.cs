@@ -7,12 +7,18 @@ public class Ellipse : Shape
     public int RadiusX { get; private set; }
     public int RadiusY { get; private set; }
 
-    public Ellipse(Vector2 centerPoint, int radiusX, int radiusY, Color color)
+    public bool Fill { get; private set; }
+
+    private GameObject fillObject;
+    private MeshRenderer fillMeshRenderer;
+    private MeshFilter fillMeshFilter;
+    public Ellipse(Vector2 centerPoint, int radiusX, int radiusY, Color color, bool fill = false)
         : base(centerPoint, color)
     {
         CenterPoint = centerPoint;
         RadiusX = radiusX;
         RadiusY = radiusY;
+        Fill = fill;
 
         points = MidpointEllipseAlgorithm(CenterPoint, RadiusX, RadiusY);
         originalPoints = new List<Vector2>(points);
@@ -20,6 +26,12 @@ public class Ellipse : Shape
         parentObject = new GameObject($"Ellipse_{CenterPoint}_Rx{RadiusX}_Ry{RadiusY}");
         parentObject.transform.position = GetCenter();
         parentObject.tag = "Selectable";
+
+        if (Fill)
+        {
+            CreateFillMesh();
+        }
+
     }
 
     private List<Vector2> MidpointEllipseAlgorithm(Vector2 center, int rx, int ry)
@@ -88,11 +100,56 @@ public class Ellipse : Shape
         };
     }
 
-    public void SetValues(Vector2 newCenter, int newRadiusX, int newRadiusY)
+    private void CreateFillMesh()
+    {
+        fillObject = new GameObject("EllipseFill");
+        fillObject.transform.SetParent(parentObject.transform);
+        fillObject.transform.localPosition = new Vector3(0, 0, 0.5f);
+
+        fillMeshFilter = fillObject.AddComponent<MeshFilter>();
+        fillMeshRenderer = fillObject.AddComponent<MeshRenderer>();
+
+        fillMeshRenderer.material = new Material(Shader.Find("Sprites/Default"));
+        fillMeshRenderer.material.color = isHighlighted ? highlightColor : Color.Lerp(Color, Color.white, 0.5f);
+
+        fillMeshFilter.mesh = GenerateEllipseMesh(RadiusX, RadiusY, 64);
+    }
+
+    private Mesh GenerateEllipseMesh(float rx, float ry, int segments)
+    {
+        Mesh mesh = new Mesh();
+        List<Vector3> vertices = new List<Vector3> { Vector3.zero };
+        List<int> triangles = new List<int>();
+
+        for (int i = 0; i <= segments; i++)
+        {
+            float angle = i * Mathf.PI * 2f / segments;
+            float x = Mathf.Cos(angle) * rx;
+            float y = Mathf.Sin(angle) * ry;
+            vertices.Add(new Vector3(x, y, 0));
+        }
+
+        for (int i = 1; i < vertices.Count - 1; i++)
+        {
+            triangles.Add(0);
+            triangles.Add(i);
+            triangles.Add(i + 1);
+        }
+
+        mesh.SetVertices(vertices);
+        mesh.SetTriangles(triangles, 0);
+        mesh.RecalculateNormals();
+        mesh.RecalculateBounds();
+
+        return mesh;
+    }
+
+    public void SetValues(Vector2 newCenter, int newRadiusX, int newRadiusY, bool fill = false)
     {
         CenterPoint = newCenter;
         RadiusX = newRadiusX;
         RadiusY = newRadiusY;
+        Fill = fill;
 
         points = MidpointEllipseAlgorithm(CenterPoint, RadiusX, RadiusY);
         originalPoints = new List<Vector2>(points);
@@ -104,7 +161,45 @@ public class Ellipse : Shape
             parentObject.transform.position = Position;
         }
 
+        if (Fill)
+        {
+            if (fillObject == null)
+            {
+                CreateFillMesh();
+            }
+            else
+            {
+                fillMeshRenderer.material.color = isHighlighted ? highlightColor : Color.Lerp(Color, Color.white, 0.5f);
+                fillMeshFilter.mesh = GenerateEllipseMesh(RadiusX, RadiusY, 64);
+            }
+        }
+        else if (fillObject != null)
+        {
+            GameObject.Destroy(fillObject);
+            fillObject = null;
+        }
+
         Redraw();
+    }
+
+    protected override void UpdateAllPixelsColor(Color color)
+    {
+        base.UpdateAllPixelsColor(color);
+        if (Fill && fillMeshRenderer != null)
+        {
+            fillMeshRenderer.material.color = Color.Lerp(color, Color.white, 0.5f);
+        }
+    }
+
+    public override void Clear()
+    {
+        base.Clear();
+
+        if (fillObject != null)
+        {
+            GameObject.Destroy(fillObject);
+            fillObject = null;
+        }
     }
 
     public override string GetDetails()

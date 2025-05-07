@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 
 public class ShapeCommandParser
 {
@@ -19,6 +20,7 @@ public class ShapeCommandParser
     {
         List<float> numbers = ParseNumbers(input);
         string colorName = ExtractLastWord(input);
+        bool isFill = ExtractSecondLastWordAsBool(input);
         Color shapeColor = TryParseColor(colorName);
 
         if (numbers == null)
@@ -34,12 +36,12 @@ public class ShapeCommandParser
             case InputMode.DrawEllipse:
             case InputMode.DrawHermit:
             case InputMode.DrawBezier:
-                HandleDrawCommand(mode, numbers, shapeColor);
+                HandleDrawCommand(mode, numbers, isFill, shapeColor);
                 break;
 
             case InputMode.Select:
                 if (selectedShape != null)
-                    HandleEditCommand(selectedShape, numbers, shapeColor);
+                    HandleEditCommand(selectedShape, numbers, isFill, shapeColor);
                 break;
 
             case InputMode.RotatePreview:
@@ -56,7 +58,7 @@ public class ShapeCommandParser
         }
     }
 
-    private void HandleDrawCommand(InputMode mode, List<float> numbers, Color color)
+    private void HandleDrawCommand(InputMode mode, List<float> numbers, bool isFill, Color color)
     {
         switch (mode)
         {
@@ -72,13 +74,13 @@ public class ShapeCommandParser
             case InputMode.DrawCircle:
                 if (!ValidatePositive(numbers, 2, "Circle requires 3 numbers: x y radius", "Circle requires positive radius"))
                     return;
-                shapeDrawer.DrawCircle(ToV2(numbers[0], numbers[1]), (int)numbers[2], color);
+                shapeDrawer.DrawCircle(ToV2(numbers[0], numbers[1]), (int)numbers[2], isFill, color);
                 break;
 
             case InputMode.DrawEllipse:
                 if (!ValidatePositive(numbers, 3, "Ellipse requires 4 numbers: x y radiusX radiusY", "Ellipse requires positive radius"))
                     return;
-                shapeDrawer.DrawEllipse(ToV2(numbers[0], numbers[1]), (int)numbers[2], (int)numbers[3], color);
+                shapeDrawer.DrawEllipse(ToV2(numbers[0], numbers[1]), (int)numbers[2], (int)numbers[3], isFill, color);
                 break;
 
             case InputMode.DrawHermit:
@@ -103,7 +105,7 @@ public class ShapeCommandParser
         }
     }
 
-    private void HandleEditCommand(Shape shape, List<float> numbers, Color color)
+    private void HandleEditCommand(Shape shape, List<float> numbers, bool isFill, Color color)
     {
         switch (shape)
         {
@@ -120,13 +122,13 @@ public class ShapeCommandParser
 
             case Circle circle:
                 if (!ValidatePositive(numbers, 2, "Circle requires 3 numbers: x y radius", "Circle requires positive radius")) return;
-                circle.SetPoints(ToV2(numbers[0], numbers[1]), (int)numbers[2]);
+                circle.SetPoints(ToV2(numbers[0], numbers[1]), (int)numbers[2], isFill);
                 circle.Recolor(color);
                 break;
 
             case Ellipse ellipse:
                 if (!ValidatePositive(numbers, 3, "Ellipse requires 4 numbers: x y radiusX radiusY", "Ellipse requires positive radius")) return;
-                ellipse.SetValues(ToV2(numbers[0], numbers[1]), (int)numbers[2], (int)numbers[3]);
+                ellipse.SetValues(ToV2(numbers[0], numbers[1]), (int)numbers[2], (int)numbers[3], isFill);
                 ellipse.Recolor(color);
                 break;
 
@@ -214,6 +216,22 @@ public class ShapeCommandParser
     private string ExtractLastWord(string input)
     {
         return string.IsNullOrWhiteSpace(input) ? "" : input.Split(' ').Last();
+    }
+
+    private bool ExtractSecondLastWordAsBool(string input, bool defaultValue = false)
+    {
+        if (string.IsNullOrWhiteSpace(input))
+            return defaultValue;
+
+        string[] words = input.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+
+        if (words.Length < 2)
+            return defaultValue;
+
+        if (bool.TryParse(words[words.Length - 2], out bool result))
+            return result;
+
+        return defaultValue;
     }
 
     private Color TryParseColor(string colorName)

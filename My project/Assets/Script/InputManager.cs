@@ -93,23 +93,27 @@ public class InputManager : MonoBehaviour
     #region General Keys
     void HandleGeneralKeys()
     {
-        if (Input.GetKeyDown(toggleGridKey) && grid != null)
+        if (Input.GetKeyDown(toggleGridKey) && grid != null && !isActiveInputCommand)
         {
             grid.ToggleGrid();
             DebugLogUI.Instance.Log($"Grid toggled: {grid.isGridVisible}");
         }
 
         if (Input.GetKeyDown(deleteKey) && currentMode == InputMode.Select)
+        {
             selectionManager.DeleteSelected();
+            inputField.text = "";
+        }
+            
 
-        if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl) &&
+        if ((Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) &&
             Input.GetKeyDown(KeyCode.S))
         {
             selectionManager.SaveToFile();
             DebugLogUI.Instance.Log("Save completed");
         }
 
-        if (Input.GetKeyDown(rotateKey) && currentMode == InputMode.Select && !selectionManager.HasSelection())
+        if (Input.GetKeyDown(rotateKey) && currentMode == InputMode.Select && !isActiveInputCommand)
         {
             currentMode = InputMode.RotatePreview;
             rotationController.StartRotation(selectionManager.GetSelectedShape());
@@ -117,7 +121,7 @@ public class InputManager : MonoBehaviour
             inputField.text = "";
         }
 
-        if (Input.GetKeyDown(moveKey) && currentMode == InputMode.Select && !selectionManager.HasSelection())
+        if (Input.GetKeyDown(moveKey) && currentMode == InputMode.Select && !isActiveInputCommand)
         {
             currentMode = InputMode.Move;
             shapeMover.StartMove(selectionManager.GetSelectedObject(), GetMousePosition());
@@ -211,8 +215,8 @@ public class InputManager : MonoBehaviour
     string GetPlaceholderText(InputMode mode) => mode switch
     {
         InputMode.DrawLine => "<X0> <Y0> <X1> <Y1> <Color>",
-        InputMode.DrawCircle => "<X0> <Y0> <R> <Color>",
-        InputMode.DrawEllipse => "<X0> <Y0> <Rx> <Ry> <Color>",
+        InputMode.DrawCircle => "<X0> <Y0> <R> <isFill> <Color>",
+        InputMode.DrawEllipse => "<X0> <Y0> <Rx> <Ry> <isFill> <Color>",
         InputMode.DrawHermit => "<P0> <P1> <T0> <T1> <Color>",
         InputMode.DrawBezier => "<P0> <P1> <P2> <P3> <Color>",
         InputMode.RotatePreview => "<Angle>",
