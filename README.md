@@ -36,7 +36,7 @@ Press the following keys to switch between interaction modes:
 
 ### 🔢 Precision Input
 
-While in any drawing mode, use the **numpad keys** to precisely define control points or parameters (e.g., radius, coordinates).
+While in any mode, press Right Mouse to precisely define control points or parameters (e.g., radius, coordinates).
 
 ---
 
