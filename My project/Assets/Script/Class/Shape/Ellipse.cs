@@ -88,9 +88,33 @@ public class Ellipse : Shape
         };
     }
 
+    public void SetValues(Vector2 newCenter, int newRadiusX, int newRadiusY)
+    {
+        CenterPoint = newCenter;
+        RadiusX = newRadiusX;
+        RadiusY = newRadiusY;
+
+        points = MidpointEllipseAlgorithm(CenterPoint, RadiusX, RadiusY);
+        originalPoints = new List<Vector2>(points);
+
+        Position = GetCenter();
+
+        if (parentObject != null)
+        {
+            parentObject.transform.position = Position;
+        }
+
+        Redraw();
+    }
+
     public override string GetDetails()
     {
         return $"Ellipse Center: {CenterPoint:F0}, RadiusX: {RadiusX:F0}, RadiusY: {RadiusY:F0}";
+    }
+
+    public override string GetValues()
+    {
+        return $"{CenterPoint.x:F0} {CenterPoint.y:F0} {RadiusX:F0} {RadiusY:F0} {ColorToString.Convert(Color)}";
     }
 
     public override Vector2 GetCenter()

@@ -25,6 +25,27 @@ public class BezierCurve : Shape
         parentObject.tag = "Selectable";
     }
 
+    public void SetValues(Vector2 newP0, Vector2 newP1, Vector2 newP2, Vector2 newP3)
+    {
+        P0 = newP0;
+        P1 = newP1;
+        P2 = newP2;
+        P3 = newP3;
+
+        int resolution = CalculateDynamicResolution(P0, P1, P2, P3);
+        points = GenerateBezierCurve(resolution);
+        originalPoints = new List<Vector2>(points);
+
+        Position = GetCenter();
+
+        if (parentObject != null)
+        {
+            parentObject.transform.position = Position;
+        }
+
+        Redraw();
+    }
+
     private int CalculateDynamicResolution(Vector2 p0, Vector2 p1, Vector2 p2, Vector2 p3)
     {
         float approxLength =
@@ -60,13 +81,15 @@ public class BezierCurve : Shape
 
     public override string GetDetails()
     {
-        return $"Bezier Curve from {Vector3ToIntString(P0)} to {Vector3ToIntString(P3)} with controls " +
-            $"{Vector3ToIntString(P1)}, {Vector3ToIntString(P2)}";
+        return $"Bezier Curve from {P0:F0} to {P3:F0} with controls " +
+            $"{P1:F0}, {P2:F0}";
     }
 
-    private string Vector3ToIntString(Vector3 vec)
+    public override string GetValues()
     {
-        return $"{(int)vec.x},{(int)vec.y},{(int)vec.z}";
+        return $"{P0.x:F0} {P0.y:F0} {P1.x:F0} {P1.y:F0} " +
+                $"{P2.x:F0} {P2.y:F0} {P3.x:F0} {P3.y:F0} " +
+                $"{ColorToString.Convert(Color)}";
     }
 
     public override Vector2 GetCenter()

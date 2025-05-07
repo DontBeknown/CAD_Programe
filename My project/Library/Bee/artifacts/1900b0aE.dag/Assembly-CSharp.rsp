@@ -442,6 +442,7 @@
 -analyzer:"D:/Unity/UnityEditor/6000.1.0f1/Editor/Data/Tools/Unity.SourceGenerators/Unity.SourceGenerators.dll"
 -analyzer:"D:/Unity/UnityEditor/6000.1.0f1/Editor/Data/Tools/Unity.SourceGenerators/Unity.UIToolkit.SourceGenerator.dll"
 "Assets/Script/CameraControl.cs"
+"Assets/Script/Class/ColorToString.cs"
 "Assets/Script/Class/Command.cs"
 "Assets/Script/Class/SelectionManager.cs"
 "Assets/Script/Class/Shape/BezierCurve.cs"

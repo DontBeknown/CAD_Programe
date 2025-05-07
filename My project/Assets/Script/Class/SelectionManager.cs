@@ -13,11 +13,15 @@ public class SelectionManager
     private ShapeSaveLoadManager saveLoadManager;
 
     private ShapeListUIManager shapeListUIManager;
-    public SelectionManager(ShapeSaveLoadManager saveLoadManager,ShapeListUIManager shapeListUIManager)
+    private InputManager inputManager;
+
+    public SelectionManager(ShapeSaveLoadManager saveLoadManager,ShapeListUIManager shapeListUIManager,
+        InputManager inputManagaer)
     {
         Instance = this;
         this.saveLoadManager = saveLoadManager;
         this.shapeListUIManager = shapeListUIManager;
+        this.inputManager = inputManagaer;
         }
     public void RegisterShape(GameObject obj, Shape shape)
     {
@@ -30,7 +34,7 @@ public class SelectionManager
     public void Select(GameObject obj)
     {
         if (selectedObject == obj) return;
-
+        
         Deselect();
 
         selectedObject = obj;
@@ -40,6 +44,9 @@ public class SelectionManager
             selectedShape = shape;
             shape.Highlight(Color.darkOrange);
             DebugLogUI.Instance.Log("Select " + detail);
+
+            inputManager.GetShapeValue(selectedShape);
+            inputManager.currentMode = InputMode.Select;
         }
     }
 

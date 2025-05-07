@@ -1,26 +1,32 @@
 using UnityEngine;
 using TMPro;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
+using System.Collections.Generic;
 
 public class InputManager : MonoBehaviour
 {
     [Header("Key Bindings")]
     public KeyCode deleteKey = KeyCode.Delete;
+    public KeyCode toggleGridKey = KeyCode.G;
+    public KeyCode rotateKey = KeyCode.R;
+    public KeyCode moveKey = KeyCode.F;
+
+    [Header("Mode Keys")]
     public KeyCode selectModeKey = KeyCode.Alpha1;
     public KeyCode lineKey = KeyCode.Alpha2;
     public KeyCode circleKey = KeyCode.Alpha3;
     public KeyCode ellipseKey = KeyCode.Alpha4;
     public KeyCode hermitKey = KeyCode.Alpha5;
     public KeyCode bezierKey = KeyCode.Alpha6;
-    public KeyCode toggleGridKey = KeyCode.G;
-    public KeyCode rotateKey = KeyCode.R;
-    public KeyCode moveKey = KeyCode.F;
 
     [Header("References")]
     [SerializeField] private TextMeshProUGUI coordinateText;
-    [SerializeField] private TextMeshProUGUI displayText;
+    [SerializeField] private TMP_InputField inputField;
     [SerializeField] private ShapeListUIManager shapeListUIManager;
-    private InputMode currentMode = InputMode.Select;
-    private string currentInput = "";
+
+    public InputMode currentMode { get; set; } = InputMode.Select;
+    private bool isActiveInputCommand = false;
 
     private ShapeDrawer shapeDrawer;
     private ShapeCommandParser commandParser;
@@ -29,12 +35,13 @@ public class InputManager : MonoBehaviour
     private ShapeSaveLoadManager shapeSaveLoadManager;
     private ShapeRotationController rotationController;
     private ShapeMover shapeMover;
+
     void Start()
     {
         grid = GetComponent<GridDraw>();
         shapeSaveLoadManager = GetComponent<ShapeSaveLoadManager>();
 
-        selectionManager = new SelectionManager(shapeSaveLoadManager, shapeListUIManager);
+        selectionManager = new SelectionManager(shapeSaveLoadManager, shapeListUIManager, this);
         shapeDrawer = new ShapeDrawer();
         rotationController = new ShapeRotationController();
         shapeMover = new ShapeMover();
@@ -46,20 +53,20 @@ public class InputManager : MonoBehaviour
     void Update()
     {
         HandleModeSwitch();
-        HandleKeyInput();
-        HandleMouseInput();
-        HandleTextInput();
-        UpdateMouseCoordinateDisplay();
+        HandleGeneralKeys();
+        HandleMouseClicks();
+        HandleTextCommand();
+        HandleRotationPreview();
+        UpdateMouseDisplay();
 
-        shapeDrawer.UpdatePreview(GetClampedMousePosition(), currentMode);
+        shapeDrawer.UpdatePreview(GetMousePosition(), currentMode);
         shapeDrawer.DrawPreview();
-
-        HandleRotationInput();
     }
 
+    #region Mode Switching
     void HandleModeSwitch()
     {
-        InputMode previousMode = currentMode;
+        InputMode prevMode = currentMode;
 
         if (Input.GetKeyDown(selectModeKey)) currentMode = InputMode.Select;
         else if (Input.GetKeyDown(lineKey)) currentMode = InputMode.DrawLine;
@@ -68,18 +75,23 @@ public class InputManager : MonoBehaviour
         else if (Input.GetKeyDown(hermitKey)) currentMode = InputMode.DrawHermit;
         else if (Input.GetKeyDown(bezierKey)) currentMode = InputMode.DrawBezier;
 
-        if (previousMode != currentMode)
+        if (prevMode != currentMode)
         {
             shapeDrawer.CancelDrawing();
+            inputField.text = "";
             DebugLogUI.Instance.Log($"Switched to {currentMode} mode");
-        }
-            
 
-        if(currentMode != InputMode.Select && currentMode != InputMode.RotatePreview && currentMode != InputMode.Move)
-            selectionManager.Deselect();
+            if (!IsEditMode(currentMode))
+                selectionManager.Deselect();
+        }
     }
 
-    void HandleKeyInput()
+    bool IsEditMode(InputMode mode) =>
+        mode == InputMode.Select || mode == InputMode.Move || mode == InputMode.RotatePreview;
+    #endregion
+
+    #region General Keys
+    void HandleGeneralKeys()
     {
         if (Input.GetKeyDown(toggleGridKey) && grid != null)
         {
@@ -88,60 +100,53 @@ public class InputManager : MonoBehaviour
         }
 
         if (Input.GetKeyDown(deleteKey) && currentMode == InputMode.Select)
-        {
             selectionManager.DeleteSelected();
-        }
 
-        bool ctrlPressed = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
-        bool commandPressed = Input.GetKey(KeyCode.LeftCommand) || Input.GetKey(KeyCode.RightCommand);
-        bool sPressed = Input.GetKeyDown(KeyCode.S);
-
-        if ((ctrlPressed || commandPressed) && sPressed)
+        if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl) &&
+            Input.GetKeyDown(KeyCode.S))
         {
             selectionManager.SaveToFile();
-            DebugLogUI.Instance.Log($"Save completed");
+            DebugLogUI.Instance.Log("Save completed");
         }
 
-        if (Input.GetKeyDown(rotateKey) && currentMode == InputMode.Select)
+        if (Input.GetKeyDown(rotateKey) && currentMode == InputMode.Select && !selectionManager.HasSelection())
         {
-            if (selectionManager.HasSelection())
-            {
-                currentMode = InputMode.RotatePreview;
-                rotationController.StartRotation(selectionManager.GetSelectedShape());
-                DebugLogUI.Instance.Log("Rotate mode started. Move mouse to rotate, click to confirm, ESC to cancel.");
-            }
+            currentMode = InputMode.RotatePreview;
+            rotationController.StartRotation(selectionManager.GetSelectedShape());
+            DebugLogUI.Instance.Log("Rotate mode started. Move mouse to rotate, click to confirm, ESC to cancel.");
+            inputField.text = "";
         }
 
-        if (Input.GetKeyDown(moveKey) && currentMode == InputMode.Select)
+        if (Input.GetKeyDown(moveKey) && currentMode == InputMode.Select && !selectionManager.HasSelection())
         {
-            if (selectionManager.HasSelection())
-            {
-                currentMode = InputMode.Move;
-                Vector2 mousePos = GetClampedMousePosition();
-                shapeMover.StartMove(selectionManager.GetSelectedObject(), mousePos);
-                DebugLogUI.Instance.Log("Move mode started. Move mouse to reposition shape. Click to confirm, ESC to cancel.");
-            }
+            currentMode = InputMode.Move;
+            shapeMover.StartMove(selectionManager.GetSelectedObject(), GetMousePosition());
+            DebugLogUI.Instance.Log("Move mode started. Click to confirm, ESC to cancel.");
+            inputField.text = "";
         }
     }
+    #endregion
 
-    void HandleMouseInput()
+    #region Mouse Input
+    void HandleMouseClicks()
     {
-        Vector2 mousePos = GetClampedMousePosition();
+        Vector2 mouse = GetMousePosition();
+
         if (Input.GetMouseButtonDown(0))
         {
-            if (currentMode == InputMode.Select)
+            switch (currentMode)
             {
-                TrySelectObject();
-            }
-            else if (currentMode == InputMode.Move && shapeMover.IsMoving)
-            {
-                shapeMover.ConfirmMove();
-                currentMode = InputMode.Select;
-                DebugLogUI.Instance.Log("Move confirmed.");
-            }
-            else
-            {
-                shapeDrawer.OnMouseClick(currentMode, mousePos);
+                case InputMode.Select:
+                    TrySelect(mouse);
+                    break;
+                case InputMode.Move when shapeMover.IsMoving:
+                    shapeMover.ConfirmMove();
+                    currentMode = InputMode.Select;
+                    DebugLogUI.Instance.Log("Move confirmed.");
+                    break;
+                default:
+                    shapeDrawer.OnMouseClick(currentMode, mouse, Color.black);
+                    break;
             }
         }
 
@@ -151,126 +156,158 @@ public class InputManager : MonoBehaviour
             {
                 shapeMover.CancelMove();
                 currentMode = InputMode.Select;
-                DebugLogUI.Instance.Log("Move cancelled.");
+                DebugLogUI.Instance.Log("Move canceled.");
             }
-
-            if (currentMode == InputMode.DrawLine ||
-                currentMode == InputMode.DrawCircle ||
-                currentMode == InputMode.DrawEllipse || 
-                currentMode == InputMode.DrawHermit ||
-                currentMode == InputMode.DrawBezier)
+            else if (!IsEditMode(currentMode))
             {
                 shapeDrawer.CancelDrawing();
+                DebugLogUI.Instance.Log("Drawing canceled.");
             }
         }
 
         if (currentMode == InputMode.Move && shapeMover.IsMoving)
         {
-            shapeMover.UpdateMove(mousePos);
+            shapeMover.UpdateMove(mouse);
         }
     }
 
-    void HandleTextInput()
+    void TrySelect(Vector2 pos)
     {
-        if (currentMode == InputMode.Select)
+        Collider2D hit = Physics2D.OverlapPoint(pos);
+        if (hit && hit.transform.parent?.parent?.CompareTag("Selectable") == true)
+            selectionManager.Select(hit.transform.parent.parent.gameObject);
+        else
         {
-            currentInput = "";
-            displayText.text = "";
-            return;
+            selectionManager.Deselect();
+            inputField.text = "";
         }
+    }
+    #endregion
 
-        foreach (KeyCode key in System.Enum.GetValues(typeof(KeyCode)))
-        {
-            if (Input.GetKeyDown(key) && key >= KeyCode.Keypad0 && key <= KeyCode.Keypad9)
-            {
-                currentInput += key.ToString().Replace("Keypad", "");
-            }
-        }
-
-        if (Input.GetKeyDown(KeyCode.KeypadMinus))
-        {
-            currentInput += "-";
-        }
-
-        if (Input.GetKeyDown(KeyCode.Space)) currentInput += " ";
-        if (Input.GetKeyDown(KeyCode.Backspace) && currentInput.Length > 0)
-            currentInput = currentInput.Substring(0, currentInput.Length - 1);
+    #region Text Commands
+    void HandleTextCommand()
+    {
+        if (Input.GetMouseButtonDown(1))
+            ToggleInputField();
 
         if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
         {
-            commandParser.ParseCommand(currentMode, currentInput);
-            currentInput = "";
+            commandParser.ParseCommand(currentMode, inputField.text, selectionManager.GetSelectedShape());
+            inputField.text = "";
 
-            if (currentMode == InputMode.RotatePreview)
+            if (currentMode == InputMode.Move || currentMode == InputMode.RotatePreview)
                 currentMode = InputMode.Select;
+
+            if (selectionManager.HasSelection())
+                GetShapeValue(selectionManager.GetSelectedShape());
         }
 
-        displayText.text = currentInput;
-    }
-
-    void UpdateMouseCoordinateDisplay()
-    {
-        if (coordinateText == null) return;
-        Vector2 world = GetClampedMousePosition();
-        Vector2 snapped = shapeDrawer.SnapToGrid(world);
-        coordinateText.text = $"Mouse: ({snapped.x}, {snapped.y})";
-    }
-
-    void TrySelectObject()
-    {
-        Vector2 mousePos = GetClampedMousePosition();
-        Collider2D hit = Physics2D.OverlapPoint(mousePos);
-
-        if (hit != null && hit.transform.parent?.parent != null)
+        if (inputField.placeholder is TextMeshProUGUI placeholder)
         {
-            GameObject parent = hit.transform.parent.parent.gameObject;
-            if (parent.CompareTag("Selectable"))
-            {
-                selectionManager.Select(parent);
-                return;
-            }
+            placeholder.text = GetPlaceholderText(currentMode);
         }
-
-        selectionManager.Deselect();
     }
 
-    void HandleRotationInput()
+    string GetPlaceholderText(InputMode mode) => mode switch
     {
-        if (currentMode == InputMode.RotatePreview && rotationController.IsRotating)
+        InputMode.DrawLine => "<X0> <Y0> <X1> <Y1> <Color>",
+        InputMode.DrawCircle => "<X0> <Y0> <R> <Color>",
+        InputMode.DrawEllipse => "<X0> <Y0> <Rx> <Ry> <Color>",
+        InputMode.DrawHermit => "<P0> <P1> <T0> <T1> <Color>",
+        InputMode.DrawBezier => "<P0> <P1> <P2> <P3> <Color>",
+        InputMode.RotatePreview => "<Angle>",
+        InputMode.Move => "<X> <Y>",
+        _ => ""
+    };
+    #endregion
+
+    #region Rotation Preview
+    void HandleRotationPreview()
+    {
+        if (currentMode != InputMode.RotatePreview || !rotationController.IsRotating)
+            return;
+
+        if (Input.GetKeyDown(KeyCode.Escape))
         {
-            if (Input.GetKeyDown(KeyCode.Escape))
-            {
-                rotationController.CancelRotation();
-                currentMode = InputMode.Select;
-                DebugLogUI.Instance.Log("Rotation canceled.");
-                return;
-            }
+            rotationController.CancelRotation();
+            currentMode = InputMode.Select;
+            DebugLogUI.Instance.Log("Rotation canceled.");
+        }
+        else if (Input.GetMouseButtonDown(0))
+        {
+            rotationController.ConfirmRotation();
+            currentMode = InputMode.Select;
+            DebugLogUI.Instance.Log("Rotation confirmed.");
+        }
+        else
+        {
+            rotationController.UpdateRotationPreview(GetMousePosition());
+        }
+    }
+    #endregion
 
-            if (Input.GetMouseButtonDown(0))
-            {
-                rotationController.ConfirmRotation();
-                currentMode = InputMode.Select;
-                DebugLogUI.Instance.Log("Rotation confirmed.");
-                return;
-            }
+    #region Utility
+    Vector2 GetMousePosition()
+    {
+        Vector2 mouse = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        return new Vector2(
+            Mathf.Clamp(mouse.x, grid.GridAreaMin.x, grid.GridAreaMax.x),
+            Mathf.Clamp(mouse.y, grid.GridAreaMin.y, grid.GridAreaMax.y));
+    }
 
-            Vector2 mouseWorld = GetClampedMousePosition();
-            rotationController.UpdateRotationPreview(mouseWorld);
+    void UpdateMouseDisplay()
+    {
+        if (coordinateText != null)
+        {
+            Vector2 world = GetMousePosition();
+            Vector2 snapped = shapeDrawer.SnapToGrid(world);
+            coordinateText.text = $"Mouse: ({snapped.x}, {snapped.y})";
         }
     }
 
-    Vector2 GetClampedMousePosition()
+    public void ToggleInputField()
     {
-
-        Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-
-        GridDraw grid = GetComponent<GridDraw>();
-        mousePos.x = Mathf.Clamp(mousePos.x, grid.GridAreaMin.x, grid.GridAreaMax.x);
-        mousePos.y = Mathf.Clamp(mousePos.y, grid.GridAreaMin.y, grid.GridAreaMax.y);
-
-        return mousePos;
+        if (isActiveInputCommand) DeactivateInputField();
+        else ActivateInputField();
     }
+
+    void ActivateInputField()
+    {
+        if (inputField == null) return;
+
+        DebugLogUI.Instance.Log("Activate command");
+
+        inputField.interactable = true;
+        inputField.Select();
+        inputField.ActivateInputField();
+        isActiveInputCommand = true;
+    }
+
+    void DeactivateInputField()
+    {
+        if (inputField == null) return;
+
+        DebugLogUI.Instance.Log("Deactivate command");
+
+        inputField.DeactivateInputField();
+        EventSystem.current?.SetSelectedGameObject(null);
+
+        if (inputField.placeholder is TextMeshProUGUI placeholder)
+            placeholder.text = "";
+
+        isActiveInputCommand = false;
+    }
+
+
+    public void GetShapeValue(Shape shape)
+    {
+        inputField.text = shape.GetValues();
+    }
+    #endregion
 }
+
+
+
 
 public enum InputMode
 {

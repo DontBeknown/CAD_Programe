@@ -6,10 +6,21 @@ public class ShapeListUIManager : MonoBehaviour
 {
     public GameObject listItemPrefab;
     public Transform listContentParent;
+    public GameObject listPanel;
 
+    private bool isPanelOpen = false;
+
+    private void Start()
+    {
+        listPanel.SetActive(isPanelOpen);
+    }
     private void Update()
     {
-        
+        if (Input.GetKeyDown(KeyCode.Tab))
+        {
+            isPanelOpen = !isPanelOpen;
+            listPanel.SetActive(isPanelOpen);
+        }
     }
     public void RefreshList(Dictionary<GameObject, Shape> shapeRegistry)
     {
@@ -18,11 +29,13 @@ public class ShapeListUIManager : MonoBehaviour
             Destroy(child.gameObject);
         }
 
+        int i = 0;
         foreach (var kvp in shapeRegistry)
         {
             GameObject listItem = Instantiate(listItemPrefab, listContentParent);
             var ui = listItem.GetComponent<ShapeListItemUI>();
-            ui.Setup(kvp.Key, kvp.Value.GetDetails());
+            ui.Setup(kvp.Key, kvp.Value.GetType().Name + $" {i}");
+            i++;
         }
     }
 }

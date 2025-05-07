@@ -10,9 +10,13 @@ public abstract class Shape
     protected List<Vector2> points;
     protected List<Vector2> originalPoints;
 
+    protected List<GameObject> drawnPixels;
+
     protected static Material sharedMaterial;
 
-    protected List<GameObject> highlightPixels = new List<GameObject>();
+    protected bool isHighlighted = false;
+    protected Color highlightColor;
+
 
     static Shape()
     {
@@ -25,6 +29,7 @@ public abstract class Shape
         Color = color;
         points = new List<Vector2>();
         originalPoints = new List<Vector2>();
+        drawnPixels = new List<GameObject>();
     }
 
     public void Draw()
@@ -44,12 +49,37 @@ public abstract class Shape
         pixel.transform.localScale = Vector3.one;
         pixel.transform.parent = parentObject.transform;
         pixel.GetComponent<Renderer>().material.color = Color;
+        drawnPixels.Add(pixel);
+    }
+
+    public virtual void Redraw()
+    {
+        foreach (GameObject pixel in drawnPixels)
+        {
+            PixelPool.Instance.ReturnPixel(pixel);
+        }
+        drawnPixels.Clear();
+
+        Draw();
+
+        if (parentObject != null && isHighlighted)
+        {
+            UpdateAllPixelsColor(highlightColor);
+        }
     }
 
     public abstract string GetDetails();
 
+    public abstract string GetValues();
+
     public virtual void Clear()
     {
+        foreach (GameObject pixel in drawnPixels)
+        {
+            PixelPool.Instance.ReturnPixel(pixel);
+        }
+        drawnPixels.Clear();
+
         if (parentObject != null)
         {
             GameObject.Destroy(parentObject);
@@ -119,29 +149,38 @@ public abstract class Shape
         return Position;
     }
 
-    public virtual void Highlight(Color highlightColor)
+    public virtual void Recolor(Color newColor)
     {
+        Color = newColor;
 
-        foreach (Transform child in parentObject.transform)
+        if (!isHighlighted)
         {
-            Renderer childRenderer = child.GetComponent<Renderer>();
-            if (childRenderer != null)
+            UpdateAllPixelsColor(newColor);
+        }
+    }
+
+    protected void UpdateAllPixelsColor(Color color)
+    {
+        foreach (GameObject pixel in drawnPixels)
+        {
+            if (pixel != null)
             {
-                childRenderer.material.color = highlightColor; 
+                pixel.GetComponent<Renderer>().material.color = color;
             }
         }
     }
 
+    public virtual void Highlight(Color highlightColor)
+    {
+        isHighlighted = true;
+        this.highlightColor = highlightColor;
+        UpdateAllPixelsColor(highlightColor);
+    }
+
     public virtual void ClearHighlight()
     {
-        foreach (Transform child in parentObject.transform)
-        {
-            Renderer childRenderer = child.GetComponent<Renderer>();
-            if (childRenderer != null)
-            {
-                childRenderer.material.color = Color; 
-            }
-        }
+        isHighlighted = false;
+        UpdateAllPixelsColor(Color);
     }
 
 }

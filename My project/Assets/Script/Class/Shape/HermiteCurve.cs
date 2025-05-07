@@ -56,9 +56,36 @@ public class HermiteCurve : Shape
         return h00 * P0 + h10 * T0 + h01 * P1 + h11 * T1;
     }
 
+    public void SetValues(Vector2 newP0, Vector2 newP1, Vector2 newT0, Vector2 newT1)
+    {
+        P0 = newP0;
+        P1 = newP1;
+        T0 = newT0;
+        T1 = newT1;
+
+        int resolution = CalculateDynamicResolution(P0, P1, T0, T1);
+        points = GenerateHermiteCurve(resolution);
+        originalPoints = new List<Vector2>(points);
+
+        Position = GetCenter();
+
+        if (parentObject != null)
+        {
+            parentObject.transform.position = Position;
+        }
+
+        Redraw();
+    }
+
     public override string GetDetails()
     {
         return $"Hermite Curve from {P0:F0} to {P1:F0} with tangents {T0:F0}, {T1:F0}";
+    }
+
+    public override string GetValues()
+    {
+        return $"{P0.x:F0} {P0.y:F0} {P1.x:F0} {P1.y:F0} " +
+                $"{T0.x:F0} {T0.y:F0} {T1.x:F0} {T1.y:F0} {ColorToString.Convert(Color)}";
     }
 
     public override Vector2 GetCenter()

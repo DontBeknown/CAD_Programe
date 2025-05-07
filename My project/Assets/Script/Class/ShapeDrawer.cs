@@ -10,7 +10,7 @@ public class ShapeDrawer
 
     private List<Vector2> hermitePoints = new List<Vector2>();
     private List<Vector2> bezierPoints = new List<Vector2>();
-    public void OnMouseClick(InputMode mode, Vector2 position)
+    public void OnMouseClick(InputMode mode, Vector2 position, Color color)
     {
         Vector2 snapped = SnapToGrid(position);
 
@@ -21,15 +21,15 @@ public class ShapeDrawer
             case InputMode.DrawEllipse:
                 HandleDrawing((start, end) =>
                 {
-                    DrawShape(mode, start, end);
+                    DrawShape(mode, start, end, color);
                 }, mode, snapped);
                 break;
 
             case InputMode.DrawHermit:
-                HandleHermiteInput(snapped);
+                HandleHermiteInput(snapped, color);
                 break;
             case InputMode.DrawBezier:
-                HandleBezierInput(snapped);
+                HandleBezierInput(snapped, color);
                 break;
         }
     }
@@ -41,41 +41,41 @@ public class ShapeDrawer
         return new Vector2(x, y);
     }
 
-    public void DrawLine(Vector2 start, Vector2 end)
+    public void DrawLine(Vector2 start, Vector2 end, Color color)
     {
-        var line = new Line(start, end, Color.black);
+        var line = new Line(start, end, color);
         SelectionManager.Instance.RegisterShape(line.parentObject, line);
         line.Draw();
         DebugLogUI.Instance.Log($"Created line from {start} to {end}");
     }
 
-    public void DrawCircle(Vector2 center, int radius)
+    public void DrawCircle(Vector2 center, int radius, Color color)
     {
-        var circle = new Circle(center, radius, Color.black);
+        var circle = new Circle(center, radius, color);
         SelectionManager.Instance.RegisterShape(circle.parentObject, circle);
         circle.Draw();
         DebugLogUI.Instance.Log($"Created circle at {center} with radius {radius}");
     }
 
-    public void DrawEllipse(Vector2 center, int radiusX, int radiusY)
+    public void DrawEllipse(Vector2 center, int radiusX, int radiusY, Color color)
     {
-        var ellipse = new Ellipse(center, radiusX, radiusY, Color.black);
+        var ellipse = new Ellipse(center, radiusX, radiusY, color);
         SelectionManager.Instance.RegisterShape(ellipse.parentObject, ellipse);
         ellipse.Draw();
         DebugLogUI.Instance.Log($"Created ellipse at {center} with radiusX={radiusX}, radiusY={radiusY}");
     }
 
-    public void DrawHermite(Vector2 p0, Vector2 p1, Vector2 t0, Vector2 t1)
+    public void DrawHermite(Vector2 p0, Vector2 p1, Vector2 t0, Vector2 t1, Color color)
     {
-        var curve = new HermiteCurve(p0, p1, t0, t1, Color.black);
+        var curve = new HermiteCurve(p0, p1, t0, t1, color);
         SelectionManager.Instance.RegisterShape(curve.parentObject, curve);
         curve.Draw();
         DebugLogUI.Instance.Log($"Created Hermite curve: P0={p0}, P1={p1}, T0={t0}, T1={t1}");
     }
 
-    public void DrawBezier(Vector2 p0, Vector2 p1, Vector2 p2, Vector2 p3)
+    public void DrawBezier(Vector2 p0, Vector2 p1, Vector2 p2, Vector2 p3, Color color)
     {
-        var curve = new BezierCurve(p0, p1, p2, p3, Color.black);
+        var curve = new BezierCurve(p0, p1, p2, p3, color);
         SelectionManager.Instance.RegisterShape(curve.parentObject, curve);
         curve.Draw();
         DebugLogUI.Instance.Log($"Created Bézier curve: P0={p0}, P1={p1}, P2={p2}, P3={p3}");
@@ -94,21 +94,21 @@ public class ShapeDrawer
         }
     }
 
-    private void DrawShape(InputMode mode, Vector2 start, Vector2 end)
+    private void DrawShape(InputMode mode, Vector2 start, Vector2 end, Color color)
     {
         switch (mode)
         {
             case InputMode.DrawLine:
-                DrawLine(start, end);
+                DrawLine(start, end, color);
                 break;
             case InputMode.DrawCircle:
                 int radius = Mathf.RoundToInt(Vector2.Distance(start, end));
-                DrawCircle(start, radius);
+                DrawCircle(start, radius, color);
                 break;
             case InputMode.DrawEllipse:
                 int radiusX = Mathf.Abs(Mathf.RoundToInt(end.x - start.x));
                 int radiusY = Mathf.Abs(Mathf.RoundToInt(end.y - start.y));
-                DrawEllipse(start, radiusX, radiusY);
+                DrawEllipse(start, radiusX, radiusY, color);
                 break;
         }
     }
@@ -144,7 +144,7 @@ public class ShapeDrawer
         DebugLogUI.Instance.Log("Drawing canceled.");
     }
 
-    private void HandleHermiteInput(Vector2 point)
+    private void HandleHermiteInput(Vector2 point, Color color)
     {
         hermitePoints.Add(point);
 
@@ -155,7 +155,7 @@ public class ShapeDrawer
             Vector2 t0 = hermitePoints[2] - p0;
             Vector2 t1 = hermitePoints[3] - p1;
 
-            DrawHermite(p0, p1, t0, t1);
+            DrawHermite(p0, p1, t0, t1, color);
 
             hermitePoints.Clear();
             previewManager.ClearPreview();
@@ -189,7 +189,7 @@ public class ShapeDrawer
         }
     }
 
-    private void HandleBezierInput(Vector2 point)
+    private void HandleBezierInput(Vector2 point, Color color)
     {
         bezierPoints.Add(point);
 
@@ -200,7 +200,7 @@ public class ShapeDrawer
             Vector2 p2 = bezierPoints[2];
             Vector2 p3 = bezierPoints[3];
 
-            DrawBezier(p0, p1, p2, p3);
+            DrawBezier(p0, p1, p2, p3, color);
 
             bezierPoints.Clear();
             previewManager.ClearPreview();

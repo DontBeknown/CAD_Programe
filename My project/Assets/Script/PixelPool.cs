@@ -39,6 +39,7 @@ public class PixelPool : MonoBehaviour
 
     public void ReturnPixel(GameObject pixel)
     {
+        pixel.transform.SetParent(null);
         pixel.SetActive(false);
         pool.Enqueue(pixel);
     }

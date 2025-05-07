@@ -1,11 +1,13 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
 
 public class ShapeCommandParser
 {
     private ShapeDrawer shapeDrawer;
     private SelectionManager selectionManager;
     private ShapeRotationController rotationController;
+
     public ShapeCommandParser(ShapeDrawer drawer, SelectionManager selection, ShapeRotationController rotation)
     {
         shapeDrawer = drawer;
@@ -13,9 +15,12 @@ public class ShapeCommandParser
         rotationController = rotation;
     }
 
-    public void ParseCommand(InputMode mode, string input)
+    public void ParseCommand(InputMode mode, string input, Shape selectedShape = null)
     {
         List<float> numbers = ParseNumbers(input);
+        string colorName = ExtractLastWord(input);
+        Color shapeColor = TryParseColor(colorName);
+
         if (numbers == null)
         {
             DebugLogUI.Instance.Log("Invalid input: " + input);
@@ -25,127 +30,219 @@ public class ShapeCommandParser
         switch (mode)
         {
             case InputMode.DrawLine:
+            case InputMode.DrawCircle:
+            case InputMode.DrawEllipse:
+            case InputMode.DrawHermit:
+            case InputMode.DrawBezier:
+                HandleDrawCommand(mode, numbers, shapeColor);
+                break;
+
+            case InputMode.Select:
+                if (selectedShape != null)
+                    HandleEditCommand(selectedShape, numbers, shapeColor);
+                break;
+
+            case InputMode.RotatePreview:
+                HandleRotation(numbers);
+                break;
+
+            case InputMode.Move:
+                HandleMove(numbers);
+                break;
+
+            default:
+                
+                break;
+        }
+    }
+
+    private void HandleDrawCommand(InputMode mode, List<float> numbers, Color color)
+    {
+        switch (mode)
+        {
+            case InputMode.DrawLine:
                 if (numbers.Count != 4)
                 {
-                    DebugLogUI.Instance.Log("Line requires 4 numbers: x1 y1 x2 y2");
+                    LogInvalid("Line requires 4 numbers: x1 y1 x2 y2");
                     return;
                 }
-                shapeDrawer.DrawLine(new Vector2(numbers[0], numbers[1]), new Vector2(numbers[2], numbers[3]));
+                shapeDrawer.DrawLine(ToV2(numbers[0], numbers[1]), ToV2(numbers[2], numbers[3]), color);
                 break;
 
             case InputMode.DrawCircle:
-                if (numbers.Count != 3)
-                {
-                    DebugLogUI.Instance.Log("Circle requires 3 numbers: x y radius");
+                if (!ValidatePositive(numbers, 2, "Circle requires 3 numbers: x y radius", "Circle requires positive radius"))
                     return;
-                }
-                if(numbers[2] <= 0)
-                {
-                    DebugLogUI.Instance.Log("Circle requires positive radius");
-                    return;
-                }
-                shapeDrawer.DrawCircle(new Vector2(numbers[0], numbers[1]), (int)numbers[2]);
+                shapeDrawer.DrawCircle(ToV2(numbers[0], numbers[1]), (int)numbers[2], color);
                 break;
 
             case InputMode.DrawEllipse:
-                if (numbers.Count != 4)
-                {
-                    DebugLogUI.Instance.Log("Ellipse requires 4 numbers: x y radiusX radiusY");
+                if (!ValidatePositive(numbers, 3, "Ellipse requires 4 numbers: x y radiusX radiusY", "Ellipse requires positive radius"))
                     return;
-                }
-                if (numbers[2] <= 0 || numbers[3] <= 0)
-                {
-                    DebugLogUI.Instance.Log("Ellipse requires positive radius");
-                    return;
-                }
-                shapeDrawer.DrawEllipse(new Vector2(numbers[0], numbers[1]), (int)numbers[2], (int)numbers[3]);
+                shapeDrawer.DrawEllipse(ToV2(numbers[0], numbers[1]), (int)numbers[2], (int)numbers[3], color);
                 break;
 
             case InputMode.DrawHermit:
                 if (numbers.Count != 8)
                 {
-                    DebugLogUI.Instance.Log("Hermite requires 4 points: p0 p1 t0 t1");
+                    LogInvalid("Hermite requires 4 points: p0 p1 t0 t1");
                     return;
                 }
-                shapeDrawer.DrawHermite(new Vector2(numbers[0], numbers[1]), new Vector2(numbers[2], numbers[3])
-                    ,new Vector2(numbers[4], numbers[5])
-                    ,new Vector2(numbers[6], numbers[7])
-                    );
+                shapeDrawer.DrawHermite(ToV2(numbers[0], numbers[1]), ToV2(numbers[2], numbers[3]),
+                                        ToV2(numbers[4], numbers[5]), ToV2(numbers[6], numbers[7]), color);
                 break;
 
             case InputMode.DrawBezier:
                 if (numbers.Count != 8)
                 {
-                    DebugLogUI.Instance.Log("Bezier requires 4 points: p0 p1 p2 p3");
+                    LogInvalid("Bezier requires 4 points: p0 p1 p2 p3");
                     return;
                 }
-                shapeDrawer.DrawBezier(new Vector2(numbers[0], numbers[1]), new Vector2(numbers[2], numbers[3])
-                    , new Vector2(numbers[4], numbers[5])
-                    , new Vector2(numbers[6], numbers[7])
-                    );
-                break;
-
-            case InputMode.RotatePreview:
-                if (numbers.Count != 1)
-                {
-                    DebugLogUI.Instance.Log("Rotate requires exactly 1 number");
-                    return;
-                }
-                float angle = numbers[0];
-                if (angle < -360 || angle > 360)
-                {
-                    DebugLogUI.Instance.Log("Rotation must be between -360 and 360");
-                    return;
-                }
-
-                Shape selected = selectionManager.GetSelectedShape();
-                if (selected == null)
-                {
-                    DebugLogUI.Instance.Log("No shape selected for rotation");
-                    return;
-                }
-
-                rotationController.StartRotation(selected);
-                rotationController.ApplyNumericRotation(angle);
-                rotationController.ConfirmRotation();
-
-                DebugLogUI.Instance.Log($"Rotated selected shape by {angle} degrees");
-                break;
-
-            case InputMode.Move:
-                if (numbers.Count != 2)
-                {
-                    DebugLogUI.Instance.Log("Move requires 2 numbers: dx dy");
-                    return;
-                }
-
-                Shape selectedMove = selectionManager.GetSelectedShape();
-                if (selectedMove == null)
-                {
-                    DebugLogUI.Instance.Log("No shape selected to move");
-                    return;
-                }
-
-                Vector2 offset = new Vector2(numbers[0], numbers[1]);
-                selectedMove.MoveOffset(offset);
-
-                DebugLogUI.Instance.Log($"Moved shape by {offset}");
-                break;
-            default:
-                DebugLogUI.Instance.Log("Invalid mode for command input");
+                shapeDrawer.DrawBezier(ToV2(numbers[0], numbers[1]), ToV2(numbers[2], numbers[3]),
+                                       ToV2(numbers[4], numbers[5]), ToV2(numbers[6], numbers[7]), color);
                 break;
         }
     }
 
+    private void HandleEditCommand(Shape shape, List<float> numbers, Color color)
+    {
+        switch (shape)
+        {
+            case Line line:
+                if (numbers.Count != 4)
+                {
+                    LogInvalid("Line requires 4 numbers: x1 y1 x2 y2");
+                    return;
+                }
+                    
+                line.SetPoints(ToV2(numbers[0], numbers[1]), ToV2(numbers[2], numbers[3]));
+                line.Recolor(color);
+                break;
+
+            case Circle circle:
+                if (!ValidatePositive(numbers, 2, "Circle requires 3 numbers: x y radius", "Circle requires positive radius")) return;
+                circle.SetPoints(ToV2(numbers[0], numbers[1]), (int)numbers[2]);
+                circle.Recolor(color);
+                break;
+
+            case Ellipse ellipse:
+                if (!ValidatePositive(numbers, 3, "Ellipse requires 4 numbers: x y radiusX radiusY", "Ellipse requires positive radius")) return;
+                ellipse.SetValues(ToV2(numbers[0], numbers[1]), (int)numbers[2], (int)numbers[3]);
+                ellipse.Recolor(color);
+                break;
+
+            case HermiteCurve hermite:
+                if (numbers.Count != 8)
+                {
+                    LogInvalid("Hermite requires 4 points: p0 p1 t0 t1");
+                    return;
+                }
+                hermite.SetValues(ToV2(numbers[0], numbers[1]), ToV2(numbers[2], numbers[3]),
+                                  ToV2(numbers[4], numbers[5]), ToV2(numbers[6], numbers[7]));
+                hermite.Recolor(color);
+                break;
+
+            case BezierCurve bezier:
+                if (numbers.Count != 8)
+                {
+                    LogInvalid("Bezier requires 4 points: p0 p1 p2 p3");
+                    return;
+                }
+                bezier.SetValues(ToV2(numbers[0], numbers[1]), ToV2(numbers[2], numbers[3]),
+                                 ToV2(numbers[4], numbers[5]), ToV2(numbers[6], numbers[7]));
+                bezier.Recolor(color);
+                break;
+        }
+    }
+
+    private void HandleRotation(List<float> numbers)
+    {
+        if (numbers.Count != 1)
+        {
+            LogInvalid("Rotate requires exactly 1 number");
+            return;
+        }
+
+        float angle = numbers[0];
+        if (angle < -360 || angle > 360)
+        {
+            LogInvalid("Rotation must be between -360 and 360");
+            return;
+        }
+
+        Shape selected = selectionManager.GetSelectedShape();
+        if (selected == null)
+        {
+            LogInvalid("No shape selected for rotation");
+            return;
+        }
+
+        rotationController.StartRotation(selected);
+        rotationController.ApplyNumericRotation(angle);
+        rotationController.ConfirmRotation();
+
+        DebugLogUI.Instance.Log($"Rotated selected shape to {angle} degrees");
+    }
+
+    private void HandleMove(List<float> numbers)
+    {
+        if (numbers.Count != 2)
+        {
+            LogInvalid("Move requires 2 numbers: dx dy");
+            return;
+        }
+
+        Shape selected = selectionManager.GetSelectedShape();
+        if (selected == null)
+        {
+            LogInvalid("No shape selected to move");
+            return;
+        }
+
+        Vector2 offset = ToV2(numbers[0], numbers[1]);
+        selected.MoveOffset(offset);
+        DebugLogUI.Instance.Log($"Moved shape by {offset}");
+    }
+
     private List<float> ParseNumbers(string input)
     {
-        string[] parts = input.Split(' ');
-        List<float> numbers = new List<float>();
-        foreach (var part in parts)
+        return input.Split(' ')
+                    .Where(p => float.TryParse(p, out _))
+                    .Select(float.Parse)
+                    .ToList();
+    }
+
+    private string ExtractLastWord(string input)
+    {
+        return string.IsNullOrWhiteSpace(input) ? "" : input.Split(' ').Last();
+    }
+
+    private Color TryParseColor(string colorName)
+    {
+        return ColorUtility.TryParseHtmlString(colorName, out var color) ? color : Color.black;
+    }
+
+    private bool ValidatePositive(List<float> numbers, int minIndex, string countError, string valueError)
+    {
+        if (numbers.Count <= minIndex)
         {
-            if (float.TryParse(part, out float result))
-                numbers.Add(result);
+            LogInvalid(countError);
+            return false;
         }
-        return numbers.Count > 0 ? numbers : null;
+
+        if (numbers.Skip(minIndex).Any(n => n <= 0))
+        {
+            LogInvalid(valueError);
+            return false;
+        }
+
+        return true;
+    }
+
+    private Vector2 ToV2(float x, float y) => new Vector2(x, y);
+
+    private bool LogInvalid(string message)
+    {
+        DebugLogUI.Instance.Log(message);
+        return false;
     }
 }

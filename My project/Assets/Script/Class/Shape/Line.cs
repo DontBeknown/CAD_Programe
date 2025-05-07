@@ -46,9 +46,32 @@ public class Line : Shape
         return result;
     }
 
+    public void SetPoints(Vector2 newStart, Vector2 newEnd)
+    {
+        StartPoint = newStart;
+        EndPoint = newEnd;
+
+        points = BresenhamLine(StartPoint, EndPoint);
+        originalPoints = new List<Vector2>(points);
+
+        Position = GetCenter();
+
+        if (parentObject != null)
+        {
+            parentObject.transform.position = Position;
+        }
+
+        Redraw();
+    }
+
     public override string GetDetails()
     {
         return $"Line from {StartPoint:F0} to {EndPoint:F0}";
+    }
+
+    public override string GetValues()
+    {
+        return $"{StartPoint.x:F0} {StartPoint.y:F0} {EndPoint.x:F0} {EndPoint.y:F0} {ColorToString.Convert(Color)}";
     }
 
     public override Vector2 GetCenter()
