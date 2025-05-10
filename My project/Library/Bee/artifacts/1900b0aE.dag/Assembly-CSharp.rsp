@@ -461,6 +461,7 @@
 "Assets/Script/InputManager.cs"
 "Assets/Script/PixelPool.cs"
 "Assets/Script/ShapeSaveLoadManager.cs"
+"Assets/Script/UI/ButtonManager.cs"
 "Assets/Script/UI/ShapeListItemUI.cs"
 "Assets/Script/UI/ShapeListUIManager.cs"
 -langversion:9.0

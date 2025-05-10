@@ -23,9 +23,10 @@ public class InputManager : MonoBehaviour
     [Header("References")]
     [SerializeField] private TextMeshProUGUI coordinateText;
     [SerializeField] private TMP_InputField inputField;
-    [SerializeField] private ShapeListUIManager shapeListUIManager;
-
+    [SerializeField] private GameObject uiManager;
+    
     public InputMode currentMode { get; set; } = InputMode.Select;
+    public Color currentColor = Color.black;
     private bool isActiveInputCommand = false;
 
     private ShapeDrawer shapeDrawer;
@@ -35,17 +36,24 @@ public class InputManager : MonoBehaviour
     private ShapeSaveLoadManager shapeSaveLoadManager;
     private ShapeRotationController rotationController;
     private ShapeMover shapeMover;
+    private ShapeListUIManager shapeListUIManager;
+    private ButtonManager buttonManager;
 
     void Start()
     {
         grid = GetComponent<GridDraw>();
         shapeSaveLoadManager = GetComponent<ShapeSaveLoadManager>();
 
+        shapeListUIManager = uiManager.GetComponent<ShapeListUIManager>();
+        buttonManager = uiManager.GetComponent<ButtonManager>();
+
         selectionManager = new SelectionManager(shapeSaveLoadManager, shapeListUIManager, this);
         shapeDrawer = new ShapeDrawer();
         rotationController = new ShapeRotationController();
         shapeMover = new ShapeMover();
         commandParser = new ShapeCommandParser(shapeDrawer, selectionManager, rotationController);
+
+        
 
         selectionManager.LoadFromFile();
     }
@@ -64,26 +72,35 @@ public class InputManager : MonoBehaviour
     }
 
     #region Mode Switching
+    public void SetMode(InputMode mode)
+    {
+        if (currentMode == mode) return;
+
+        InputMode prevMode = currentMode;
+        currentMode = mode;
+
+        if ((mode == InputMode.RotatePreview || mode == InputMode.Move) && selectionManager.GetSelectedShape() == null)
+        {
+            currentMode = prevMode;
+        }
+
+        shapeDrawer.CancelDrawing();
+        inputField.text = "";
+        DebugLogUI.Instance.Log($"Switched to {currentMode} mode");
+        buttonManager.SetButtonMode(currentMode);
+
+        if (!IsEditMode(currentMode))
+            selectionManager.Deselect();
+    }
+
     void HandleModeSwitch()
     {
-        InputMode prevMode = currentMode;
-
-        if (Input.GetKeyDown(selectModeKey)) currentMode = InputMode.Select;
-        else if (Input.GetKeyDown(lineKey)) currentMode = InputMode.DrawLine;
-        else if (Input.GetKeyDown(circleKey)) currentMode = InputMode.DrawCircle;
-        else if (Input.GetKeyDown(ellipseKey)) currentMode = InputMode.DrawEllipse;
-        else if (Input.GetKeyDown(hermitKey)) currentMode = InputMode.DrawHermit;
-        else if (Input.GetKeyDown(bezierKey)) currentMode = InputMode.DrawBezier;
-
-        if (prevMode != currentMode)
-        {
-            shapeDrawer.CancelDrawing();
-            inputField.text = "";
-            DebugLogUI.Instance.Log($"Switched to {currentMode} mode");
-
-            if (!IsEditMode(currentMode))
-                selectionManager.Deselect();
-        }
+        if (Input.GetKeyDown(selectModeKey)) SetMode(InputMode.Select);
+        else if (Input.GetKeyDown(lineKey)) SetMode(InputMode.DrawLine);
+        else if (Input.GetKeyDown(circleKey)) SetMode(InputMode.DrawCircle);
+        else if (Input.GetKeyDown(ellipseKey)) SetMode(InputMode.DrawEllipse);
+        else if (Input.GetKeyDown(hermitKey)) SetMode(InputMode.DrawHermit);
+        else if (Input.GetKeyDown(bezierKey)) SetMode(InputMode.DrawBezier);
     }
 
     bool IsEditMode(InputMode mode) =>
@@ -99,7 +116,8 @@ public class InputManager : MonoBehaviour
             DebugLogUI.Instance.Log($"Grid toggled: {grid.isGridVisible}");
         }
 
-        if (Input.GetKeyDown(deleteKey) && currentMode == InputMode.Select)
+        if ((Input.GetKeyDown(deleteKey) || Input.GetKeyDown(KeyCode.Backspace)) 
+            && currentMode == InputMode.Select && !isActiveInputCommand)
         {
             selectionManager.DeleteSelected();
             inputField.text = "";
@@ -149,7 +167,7 @@ public class InputManager : MonoBehaviour
                     DebugLogUI.Instance.Log("Move confirmed.");
                     break;
                 default:
-                    shapeDrawer.OnMouseClick(currentMode, mouse, Color.black);
+                    shapeDrawer.OnMouseClick(currentMode, mouse, currentColor);
                     break;
             }
         }
@@ -306,6 +324,11 @@ public class InputManager : MonoBehaviour
     public void GetShapeValue(Shape shape)
     {
         inputField.text = shape.GetValues();
+    }
+
+    public bool isSelected()
+    {
+        return selectionManager.GetSelectedShape() != null;
     }
     #endregion
 }

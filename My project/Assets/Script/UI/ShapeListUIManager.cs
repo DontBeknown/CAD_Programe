@@ -7,19 +7,20 @@ public class ShapeListUIManager : MonoBehaviour
     public GameObject listItemPrefab;
     public Transform listContentParent;
     public GameObject listPanel;
+    public Button layerButton;
 
     private bool isPanelOpen = false;
 
     private void Start()
     {
+        layerButton.onClick.AddListener(() => ToggleLayerList());
         listPanel.SetActive(isPanelOpen);
     }
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.Tab))
         {
-            isPanelOpen = !isPanelOpen;
-            listPanel.SetActive(isPanelOpen);
+            ToggleLayerList();
         }
     }
     public void RefreshList(Dictionary<GameObject, Shape> shapeRegistry)
@@ -37,5 +38,11 @@ public class ShapeListUIManager : MonoBehaviour
             ui.Setup(kvp.Key, kvp.Value.GetType().Name + $" {i}");
             i++;
         }
+    }
+
+    private void ToggleLayerList()
+    {
+        isPanelOpen = !isPanelOpen;
+        listPanel.SetActive(isPanelOpen);
     }
 }

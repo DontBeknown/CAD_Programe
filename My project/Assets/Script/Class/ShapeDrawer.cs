@@ -140,8 +140,8 @@ public class ShapeDrawer
     {
         startPoint = null;
         hermitePoints.Clear();
+        bezierPoints.Clear();
         previewManager.ClearPreview();
-        DebugLogUI.Instance.Log("Drawing canceled.");
     }
 
     private void HandleHermiteInput(Vector2 point, Color color)
