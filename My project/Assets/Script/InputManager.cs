@@ -11,6 +11,7 @@ public class InputManager : MonoBehaviour
     public KeyCode toggleGridKey = KeyCode.G;
     public KeyCode rotateKey = KeyCode.R;
     public KeyCode moveKey = KeyCode.F;
+    public KeyCode colorKey = KeyCode.C;
 
     [Header("Mode Keys")]
     public KeyCode selectModeKey = KeyCode.Alpha1;
@@ -101,6 +102,7 @@ public class InputManager : MonoBehaviour
         else if (Input.GetKeyDown(ellipseKey)) SetMode(InputMode.DrawEllipse);
         else if (Input.GetKeyDown(hermitKey)) SetMode(InputMode.DrawHermit);
         else if (Input.GetKeyDown(bezierKey)) SetMode(InputMode.DrawBezier);
+        else if (Input.GetKeyDown(colorKey)) SetMode(InputMode.ColorPick);
     }
 
     bool IsEditMode(InputMode mode) =>
@@ -330,6 +332,7 @@ public class InputManager : MonoBehaviour
     {
         return selectionManager.GetSelectedShape() != null;
     }
+
     #endregion
 }
 
@@ -346,5 +349,6 @@ public enum InputMode
     DrawBezier,
     RotatePreview,
     Move,
+    ColorPick,
 }
 

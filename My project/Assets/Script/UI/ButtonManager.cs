@@ -9,6 +9,7 @@ public class ButtonManager : MonoBehaviour
     {
         public InputMode mode;
         public Button button;
+        public GameObject panel;
     }
 
     [SerializeField] InputManager inputManager;
@@ -37,6 +38,10 @@ public class ButtonManager : MonoBehaviour
         {
             bool isActive = mb.mode == newMode;
             SetButtonState(mb.button, isActive);
+            if(mb.mode == InputMode.ColorPick)
+            {
+                mb.panel.SetActive(isActive);
+            }
         }
     }
 

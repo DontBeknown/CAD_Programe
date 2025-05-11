@@ -53,6 +53,6 @@ public static class ColorToString
 
     public static string ToRGB255String(Color color)
     {
-        return $"RGB({(int)(color.r * 255)}, {(int)(color.g * 255)}, {(int)(color.b * 255)})";
+        return $"{(int)(color.r * 255)} {(int)(color.g * 255)} {(int)(color.b * 255)}";
     }
 }
