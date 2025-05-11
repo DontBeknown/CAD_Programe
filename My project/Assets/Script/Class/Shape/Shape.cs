@@ -4,6 +4,7 @@ using UnityEngine;
 public abstract class Shape
 {
     public Vector2 Position { get; protected set; }
+    public Vector2 Offset { get; protected set; }
     public Color Color { get; protected set; }
     public GameObject parentObject;
 
@@ -90,26 +91,11 @@ public abstract class Shape
     public virtual void MoveOffset(Vector2 offset)
     {
         Position += offset;
+        Offset = offset;
 
         if (parentObject != null)
         {
             parentObject.transform.position += new Vector3(offset.x, offset.y, 0f);
-        }
-
-        for (int i = 0; i < points.Count; i++)
-        {
-            points[i] += offset;
-        }
-    }
-
-    public virtual void MoveToPoint(Vector2 destination)
-    {
-        Vector2 offset = destination - GetCenter();
-        Position = destination;
-
-        if (parentObject != null)
-        {
-            parentObject.transform.position = new Vector3(destination.x, destination.y, 0f);
         }
 
         for (int i = 0; i < points.Count; i++)

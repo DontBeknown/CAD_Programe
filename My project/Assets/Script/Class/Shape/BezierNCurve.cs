@@ -80,6 +80,11 @@ public class BezierNCurve : Shape
         return $"Bezier-N Curve with {controlPoints.Count} control points.";
     }
 
+    public List<Vector2> GetControlPoints()
+    {
+        return new List<Vector2>(controlPoints);
+    }
+
     public override string GetValues()
     {
         string result = "";

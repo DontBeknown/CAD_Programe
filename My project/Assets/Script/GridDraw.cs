@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using TMPro;
 
 public class GridDraw : MonoBehaviour
 {
@@ -14,6 +15,10 @@ public class GridDraw : MonoBehaviour
     private List<LineRenderer> lineRenderers = new List<LineRenderer>();
     public bool isGridVisible = true;
 
+    public TMP_InputField gridSizeInput;
+    public TMP_InputField gridWidthInput;
+    public TMP_InputField gridHeightInput;
+
     private Queue<LineRenderer> linePool = new Queue<LineRenderer>();
 
     void Start()
@@ -23,6 +28,14 @@ public class GridDraw : MonoBehaviour
         RenderGrid();
         
         if(!isGridVisible) gridParent.SetActive(isGridVisible);
+
+        if (gridSizeInput != null)
+        {
+            gridSizeInput.text = GridSize.ToString();
+            gridSizeInput.onValueChanged.AddListener(OnGridSizeChanged);
+        }
+        if (gridWidthInput != null) gridWidthInput.text = (GridAreaMax.x - GridAreaMin.x).ToString();
+        if (gridHeightInput != null) gridHeightInput.text = (GridAreaMax.y - GridAreaMin.y).ToString();
     }
 
     LineRenderer GetLineRenderer()
@@ -70,4 +83,66 @@ public class GridDraw : MonoBehaviour
         isGridVisible = !isGridVisible;
         gridParent.SetActive(isGridVisible);
     }
+
+    public void RegenerateGrid()
+    {
+        foreach (var line in lineRenderers)
+        {
+            line.gameObject.SetActive(false);
+            linePool.Enqueue(line);
+        }
+
+        lineRenderers.Clear();
+        RenderGrid();
+    }
+
+    public void ApplyGridSettingsFromUI()
+    {
+        if (float.TryParse(gridSizeInput.text, out float newGridSize))
+            GridSize = Mathf.Max(0.1f, newGridSize);
+
+        if (int.TryParse(gridWidthInput.text, out int width))
+        {
+            int halfWidth = Mathf.Max(1, width / 2);
+            GridAreaMin.x = -halfWidth;
+            GridAreaMax.x = halfWidth;
+        }
+
+        if (int.TryParse(gridHeightInput.text, out int height))
+        {
+            int halfHeight = Mathf.Max(1, height / 2);
+            GridAreaMin.y = -halfHeight;
+            GridAreaMax.y = halfHeight;
+        }
+
+        RegenerateGrid();
+    }
+
+    public void SetGridSettings(float gridSize, Vector2Int gridMin, Vector2Int gridMax)
+    {
+        GridSize = gridSize;
+        GridAreaMin = gridMin;
+        GridAreaMax = gridMax;
+
+        if (gridSizeInput != null)
+            gridSizeInput.text = GridSize.ToString();
+
+        if (gridWidthInput != null)
+            gridWidthInput.text = (GridAreaMax.x - GridAreaMin.x).ToString();
+
+        if (gridHeightInput != null)
+            gridHeightInput.text = (GridAreaMax.y - GridAreaMin.y).ToString();
+
+        RegenerateGrid();
+    }
+
+    private void OnGridSizeChanged(string newSize)
+    {
+        if (float.TryParse(newSize, out float parsedSize))
+        {
+            GridSize = Mathf.Max(0.1f, parsedSize);
+            RegenerateGrid();
+        }
+    }
+
 }

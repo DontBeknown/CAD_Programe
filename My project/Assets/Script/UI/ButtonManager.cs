@@ -12,6 +12,10 @@ public class ButtonManager : MonoBehaviour
         public GameObject panel;
     }
 
+    public GameObject filePanel;
+    public Button saveButton;
+    public Button loadButton;
+
     [SerializeField] InputManager inputManager;
     public List<ModeButton> modeButtons;
 
@@ -64,6 +68,11 @@ public class ButtonManager : MonoBehaviour
         }
 
         button.colors = colors;
+    }
+
+    public void ToggleFilePanel()
+    {
+        filePanel.SetActive(!filePanel.activeSelf);
     }
 
 }

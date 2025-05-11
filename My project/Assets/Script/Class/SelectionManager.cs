@@ -95,6 +95,20 @@ public class SelectionManager
         shapeListUIManager.RefreshList(shapeRegistry);
     }
 
+    public void ClearAllShapes()
+    {
+        Deselect();
+
+        foreach (var pair in shapeRegistry)
+        {
+            GameObject.Destroy(pair.Key);
+        }
+
+        shapeRegistry.Clear();
+        shapeListUIManager.RefreshList(shapeRegistry);
+        DebugLogUI.Instance.Log("Cleared all shapes.");
+    }
+
     public bool HasSelection()
     {
         return selectedShape != null;

@@ -24,6 +24,7 @@ public class CameraControl : MonoBehaviour
 
     void Update()
     {
+
         float scroll = Input.GetAxis("Mouse ScrollWheel");
         Camera.main.orthographicSize -= scroll * ZoomSpeed * Time.deltaTime * 100f;
         Camera.main.orthographicSize = Mathf.Clamp(Camera.main.orthographicSize, MinZoom, MaxZoom);
@@ -45,5 +46,11 @@ public class CameraControl : MonoBehaviour
         pos.x = Mathf.Clamp(pos.x, PanLimits.xMin, PanLimits.xMax);
         pos.y = Mathf.Clamp(pos.y, PanLimits.yMin, PanLimits.yMax);
         Camera.main.transform.position = pos;
+    }
+
+    public void UpdatePanLimit()
+    {
+        PanLimits = new Rect(gridDraw.GridAreaMin.x, gridDraw.GridAreaMin.y,
+                gridDraw.GridAreaMax.x - gridDraw.GridAreaMin.x, gridDraw.GridAreaMax.y - gridDraw.GridAreaMin.y);
     }
 }

@@ -1,13 +1,35 @@
 using UnityEngine;
 using System.IO;
 using System.Collections.Generic;
+using TMPro;
 
+using UnityEngine.UI;
 public class ShapeSaveLoadManager : MonoBehaviour
 {
-    private string savePath => Application.persistentDataPath + "/shapes.json";
+    public TMP_InputField fileNameInput;
+    public TMP_Dropdown fileDropdown;
+
+    private GridDraw gridDraw;
+    private string GetSavePath(string fileName) =>
+    Path.Combine(Application.persistentDataPath, fileName + ".json");
+
+    void Start()
+    {
+        RefreshDropdown();
+
+        gridDraw = GetComponent<GridDraw>();
+    }
 
     public void SaveShapes(List<Shape> shapes)
     {
+        string fileName = fileNameInput.text.Trim();
+
+        if (string.IsNullOrEmpty(fileName))
+        {
+            DebugLogUI.Instance.Log("Save failed: File name is empty.");
+            return;
+        }
+
         List<ShapeData> shapeDatas = new List<ShapeData>();
 
         foreach (var shape in shapes)
@@ -20,6 +42,8 @@ public class ShapeSaveLoadManager : MonoBehaviour
                     position1 = line.StartPoint,
                     position2 = line.EndPoint,
                     Color = line.Color,
+                    offsetPosition = shape.Offset,
+                    rotation = shape.GetRotation()
                 });
             }
             else if (shape is Circle circle)
@@ -31,6 +55,8 @@ public class ShapeSaveLoadManager : MonoBehaviour
                     radius = circle.Radius,
                     Color = circle.Color,
                     isFill = circle.Fill,
+                    offsetPosition = shape.Offset,
+                    rotation = shape.GetRotation()
                 });
             }
             else if (shape is Ellipse ellipse)
@@ -41,7 +67,9 @@ public class ShapeSaveLoadManager : MonoBehaviour
                     position1 = ellipse.CenterPoint,
                     radiusX = ellipse.RadiusX,
                     radiusY = ellipse.RadiusY,
-                    Color = ellipse.Color
+                    Color = ellipse.Color,
+                    offsetPosition = shape.Offset,
+                    rotation = shape.GetRotation()
                 });
             }
             else if (shape is HermiteCurve hermite)
@@ -52,7 +80,9 @@ public class ShapeSaveLoadManager : MonoBehaviour
                     position2 = hermite.P1,
                     position3 = hermite.T0,
                     position4 = hermite.T1,
-                    Color = hermite.Color
+                    Color = hermite.Color,
+                    offsetPosition = shape.Offset,
+                    rotation = shape.GetRotation()
                 });
             }
             else if (shape is BezierCurve bezier)
@@ -64,43 +94,94 @@ public class ShapeSaveLoadManager : MonoBehaviour
                     position2 = bezier.P1,
                     position3 = bezier.P2,
                     position4 = bezier.P3,
-                    Color = bezier.Color
+                    Color = bezier.Color,
+                    offsetPosition = shape.Offset,
+                    rotation = shape.GetRotation()
                 });
             }
+            else if (shape is BezierNCurve bezierN)
+            {
+                shapeDatas.Add(new ShapeData
+                {
+                    type = "BezierN",
+                    controlPoints = new List<Vector2>(bezierN.GetControlPoints()),
+                    Color = bezierN.Color,
+                    offsetPosition = shape.Offset,
+                    rotation = shape.GetRotation()
+                });
+            }
+
         }
 
-        string json = JsonUtility.ToJson(new ShapeDataWrapper { shapes = shapeDatas }, true);
-        File.WriteAllText(savePath, json);
+        ShapeDataWrapper wrapper = new ShapeDataWrapper
+        {
+            shapes = shapeDatas,
+            gridData = new GridData
+            {
+                gridSize = gridDraw.GridSize,
+                gridMin = gridDraw.GridAreaMin,
+                gridMax = gridDraw.GridAreaMax
+            }
+        };
+
+        string json = JsonUtility.ToJson(wrapper, true);
+        File.WriteAllText(GetSavePath(fileName), json);
+
+        RefreshDropdown();
     }
 
     public List<Shape> LoadShapes()
     {
-        if (!File.Exists(savePath)) return new List<Shape>();
+        string fileName = fileDropdown.options[fileDropdown.value].text;
+        string path = GetSavePath(fileName);
 
-        string json = File.ReadAllText(savePath);
+        if (!File.Exists(path))
+        {
+            DebugLogUI.Instance.Log("Load failed: File does not exist.");
+            return new List<Shape>();
+        }
+
+        string json = File.ReadAllText(path);
         var wrapper = JsonUtility.FromJson<ShapeDataWrapper>(json);
+
+        if (wrapper.gridData != null)
+        {
+            gridDraw.SetGridSettings(wrapper.gridData.gridSize, wrapper.gridData.gridMin, wrapper.gridData.gridMax);
+        }
+
         List<Shape> loadedShapes = new List<Shape>();
 
         foreach (var data in wrapper.shapes)
         {
+            Shape shape = null;
+
             switch (data.type)
             {
                 case "Line":
-                    loadedShapes.Add(new Line(data.position1, data.position2, data.Color));
+                    shape = new Line(data.position1, data.position2, data.Color);
                     break;
                 case "Circle":
-                    loadedShapes.Add(new Circle(data.position1, data.radius, data.Color, data.isFill));
+                    shape = new Circle(data.position1, data.radius, data.Color, data.isFill);
                     break;
                 case "Ellipse":
-                    loadedShapes.Add(new Ellipse(data.position1, data.radiusX, data.radiusY, data.Color, data.isFill));
+                    shape = new Ellipse(data.position1, data.radiusX, data.radiusY, data.Color, data.isFill);
                     break;
                 case "Hermite":
-                    loadedShapes.Add(new HermiteCurve(data.position1, data.position2, data.position3, data.position4, data.Color));
+                    shape = new HermiteCurve(data.position1, data.position2, data.position3, data.position4, data.Color);
                     break;
                 case "Bezier":
-                    loadedShapes.Add(new BezierCurve(data.position1, data.position2, data.position3, data.position4, data.Color));
+                    shape = new BezierCurve(data.position1, data.position2, data.position3, data.position4, data.Color);
                     break;
+                case "BezierN":
+                    shape = new BezierNCurve(data.controlPoints, data.Color);
+                    break;
+            }
 
+            if (shape != null)
+            {
+                //shape.MoveOffset(data.offsetPosition);
+                //shape.SetRotation(data.rotation);
+                loadedShapes.Add(shape);
             }
         }
 
@@ -113,10 +194,26 @@ public class ShapeSaveLoadManager : MonoBehaviour
         return loadedShapes;
     }
 
+    public void RefreshDropdown()
+    {
+        fileDropdown.ClearOptions();
+
+        string[] files = Directory.GetFiles(Application.persistentDataPath, "*.json");
+        List<string> fileNames = new List<string>();
+
+        foreach (var file in files)
+        {
+            fileNames.Add(Path.GetFileNameWithoutExtension(file));
+        }
+
+        fileDropdown.AddOptions(fileNames);
+    }   
+
     [System.Serializable]
     private class ShapeDataWrapper
     {
         public List<ShapeData> shapes;
+        public GridData gridData;
     }
 
     [System.Serializable]
@@ -130,6 +227,11 @@ public class ShapeSaveLoadManager : MonoBehaviour
         public int radius;
         public int radiusX;
         public int radiusY;
+
+        public List<Vector2> controlPoints;
+
+        public Vector2 offsetPosition;
+        public float rotation;
 
         public bool isFill;
 
@@ -159,4 +261,13 @@ public class ShapeSaveLoadManager : MonoBehaviour
             return new Color32(r, g, b, a);
         }
     }
+
+    [System.Serializable]
+    public class GridData
+    {
+        public float gridSize;
+        public Vector2Int gridMin;
+        public Vector2Int gridMax;
+    }
+
 }

@@ -56,9 +56,8 @@ public class InputManager : MonoBehaviour
         shapeMover = new ShapeMover();
         commandParser = new ShapeCommandParser(shapeDrawer, selectionManager, rotationController);
 
-        
+        buttonManager.saveButton.onClick.AddListener(() => selectionManager.SaveToFile());
 
-        selectionManager.LoadFromFile();
     }
 
     void Update()
@@ -348,7 +347,6 @@ public class InputManager : MonoBehaviour
         isActiveInputCommand = false;
     }
 
-
     public void GetShapeValue(Shape shape)
     {
         inputField.text = shape.GetValues();
@@ -357,6 +355,16 @@ public class InputManager : MonoBehaviour
     public bool isSelected()
     {
         return selectionManager.GetSelectedShape() != null;
+    }
+
+    public void Newfile()
+    {
+        selectionManager.ClearAllShapes();
+    }
+    public void LoadFile()
+    {
+        selectionManager.ClearAllShapes();
+        selectionManager.LoadFromFile();
     }
 
     #endregion
