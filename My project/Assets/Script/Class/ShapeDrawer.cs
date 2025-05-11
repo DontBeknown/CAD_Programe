@@ -9,7 +9,11 @@ public class ShapeDrawer
     private ShapePreviewManager previewManager = new ShapePreviewManager();
 
     private List<Vector2> hermitePoints = new List<Vector2>();
+
     private List<Vector2> bezierPoints = new List<Vector2>();
+
+    private List<Vector2> bezierNPoints = new List<Vector2>();
+    private List<GameObject> bezierNControlPointVisuals = new List<GameObject>();
     public void OnMouseClick(InputMode mode, Vector2 position, Color color)
     {
         Vector2 snapped = SnapToGrid(position);
@@ -28,8 +32,8 @@ public class ShapeDrawer
             case InputMode.DrawHermit:
                 HandleHermiteInput(snapped, color);
                 break;
-            case InputMode.DrawBezier:
-                HandleBezierInput(snapped, color);
+            case InputMode.DrawNBezier:
+                HandleBezierNInput(snapped);
                 break;
         }
     }
@@ -124,9 +128,9 @@ public class ShapeDrawer
         {
             previewManager.UpdatePreview(mode, startPoint.Value, snapped);
         }
-        else if (mode == InputMode.DrawBezier)
+        else if (mode == InputMode.DrawNBezier)
         {
-            UpdateBezierPreview(snapped);
+            UpdateBezierNPreview(snapped);
         }
 
     }
@@ -142,8 +146,10 @@ public class ShapeDrawer
         hermitePoints.Clear();
         bezierPoints.Clear();
         previewManager.ClearPreview();
+        ClearBezierNControlPointVisuals();
     }
 
+    #region Hermite Drawing
     private void HandleHermiteInput(Vector2 point, Color color)
     {
         hermitePoints.Add(point);
@@ -189,6 +195,9 @@ public class ShapeDrawer
         }
     }
 
+    #endregion
+
+    #region Bezier Drawing
     private void HandleBezierInput(Vector2 point, Color color)
     {
         bezierPoints.Add(point);
@@ -226,5 +235,57 @@ public class ShapeDrawer
                 previewManager.ClearPreview();
                 break;
         }
+    }
+
+    #endregion
+    private void HandleBezierNInput(Vector2 point)
+    {
+        bezierNPoints.Add(point);
+        
+        GameObject pixel = PixelPool.Instance.GetPixel();
+        pixel.transform.position = new Vector3(point.x, point.y, 0);
+        pixel.transform.localScale = Vector3.one * 3f;
+        pixel.GetComponent<Renderer>().material.color = Color.red;
+        pixel.transform.parent = null; 
+
+        bezierNControlPointVisuals.Add(pixel);
+    }
+    private void UpdateBezierNPreview(Vector2 current)
+    {
+        var previewPoints = new List<Vector2>(bezierNPoints) { current };
+
+        if (previewPoints.Count >= 2)
+        {
+            previewManager.UpdateCustomPreview(new BezierNCurve(previewPoints, Color.gray));
+        }
+        else
+        {
+            previewManager.ClearPreview();
+        }
+    }
+
+    private void ClearBezierNControlPointVisuals()
+    {
+        foreach (var pixel in bezierNControlPointVisuals)
+        {
+            if (pixel != null)
+                PixelPool.Instance.ReturnPixel(pixel);
+        }
+        bezierNControlPointVisuals.Clear();
+    }
+
+    public void FinalizeBezierN(Color color)
+    {
+        if (bezierNPoints.Count >= 2)
+        {
+            var curve = new BezierNCurve(bezierNPoints, color);
+            SelectionManager.Instance.RegisterShape(curve.parentObject, curve);
+            curve.Draw();
+            DebugLogUI.Instance.Log($"Created Bézier-N curve with {bezierNPoints.Count} points.");
+        }
+
+        bezierNPoints.Clear();
+        previewManager.ClearPreview();
+        ClearBezierNControlPointVisuals();
     }
 }

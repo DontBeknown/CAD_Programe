@@ -35,7 +35,6 @@ public class ShapeCommandParser
             case InputMode.DrawCircle:
             case InputMode.DrawEllipse:
             case InputMode.DrawHermit:
-            case InputMode.DrawBezier:
                 HandleDrawCommand(mode, numbers, isFill, shapeColor);
                 break;
 
@@ -93,15 +92,6 @@ public class ShapeCommandParser
                                         ToV2(numbers[4], numbers[5]), ToV2(numbers[6], numbers[7]), color);
                 break;
 
-            case InputMode.DrawBezier:
-                if (numbers.Count != 8)
-                {
-                    LogInvalid("Bezier requires 4 points: p0 p1 p2 p3");
-                    return;
-                }
-                shapeDrawer.DrawBezier(ToV2(numbers[0], numbers[1]), ToV2(numbers[2], numbers[3]),
-                                       ToV2(numbers[4], numbers[5]), ToV2(numbers[6], numbers[7]), color);
-                break;
         }
     }
 

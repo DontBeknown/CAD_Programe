@@ -8,6 +8,8 @@ public class BezierCurve : Shape
     public Vector2 P2 { get; private set; }
     public Vector2 P3 { get; private set; }
 
+    private List<GameObject> controlPointPixels = new List<GameObject>();
+
     public BezierCurve(Vector2 p0, Vector2 p1, Vector2 p2, Vector2 p3, Color color)
         : base(p0, color)
     {
@@ -95,5 +97,53 @@ public class BezierCurve : Shape
     public override Vector2 GetCenter()
     {
         return (P0 + P1 + P2 + P3) / 4f;
+    }
+
+    public void ShowControlPoints(Color highlightColor)
+    {
+        HideControlPoints();
+
+        Vector2[] controlPoints = { P0, P1, P2, P3 };
+        foreach (var point in controlPoints)
+        {
+            GameObject pixel = PixelPool.Instance.GetPixel();
+            pixel.transform.position = new Vector3(Mathf.Round(point.x), Mathf.Round(point.y), 0);
+            pixel.transform.localScale = Vector3.one * 3f;
+            pixel.transform.parent = parentObject.transform;
+            pixel.GetComponent<Renderer>().material.color = highlightColor;
+
+            controlPointPixels.Add(pixel);
+        }
+
+
+    }
+
+    public void HideControlPoints()
+    {
+        foreach (var pixel in controlPointPixels)
+        {
+            if (pixel != null)
+                PixelPool.Instance.ReturnPixel(pixel);
+        }
+        controlPointPixels.Clear();
+
+    }
+
+    public override void Clear()
+    {
+        base.Clear();
+        HideControlPoints();
+    }
+
+    public override void Highlight(Color highlightColor)
+    {
+        base.Highlight(highlightColor);
+        ShowControlPoints(Color.red);
+    }
+
+    public override void ClearHighlight()
+    {
+        base.ClearHighlight();
+        HideControlPoints();
     }
 }

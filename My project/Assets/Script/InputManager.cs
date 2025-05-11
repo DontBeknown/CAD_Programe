@@ -3,6 +3,8 @@ using TMPro;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using UnityEngine.InputSystem;
+using UnityEngine.UIElements;
 
 public class InputManager : MonoBehaviour
 {
@@ -19,7 +21,7 @@ public class InputManager : MonoBehaviour
     public KeyCode circleKey = KeyCode.Alpha3;
     public KeyCode ellipseKey = KeyCode.Alpha4;
     public KeyCode hermitKey = KeyCode.Alpha5;
-    public KeyCode bezierKey = KeyCode.Alpha6;
+    public KeyCode bezierNKey = KeyCode.Alpha6;
 
     [Header("References")]
     [SerializeField] private TextMeshProUGUI coordinateText;
@@ -101,7 +103,7 @@ public class InputManager : MonoBehaviour
         else if (Input.GetKeyDown(circleKey)) SetMode(InputMode.DrawCircle);
         else if (Input.GetKeyDown(ellipseKey)) SetMode(InputMode.DrawEllipse);
         else if (Input.GetKeyDown(hermitKey)) SetMode(InputMode.DrawHermit);
-        else if (Input.GetKeyDown(bezierKey)) SetMode(InputMode.DrawBezier);
+        else if (Input.GetKeyDown(bezierNKey)) SetMode(InputMode.DrawNBezier);
         else if (Input.GetKeyDown(colorKey)) SetMode(InputMode.ColorPick);
     }
 
@@ -147,6 +149,11 @@ public class InputManager : MonoBehaviour
             shapeMover.StartMove(selectionManager.GetSelectedObject(), GetMousePosition());
             DebugLogUI.Instance.Log("Move mode started. Click to confirm, ESC to cancel.");
             inputField.text = "";
+        }
+
+        if (Input.GetKeyDown(KeyCode.Return) && currentMode == InputMode.DrawNBezier)
+        {
+            shapeDrawer.FinalizeBezierN(currentColor);
         }
     }
     #endregion
@@ -238,7 +245,6 @@ public class InputManager : MonoBehaviour
         InputMode.DrawCircle => "<X0> <Y0> <R> <isFill> <Color>",
         InputMode.DrawEllipse => "<X0> <Y0> <Rx> <Ry> <isFill> <Color>",
         InputMode.DrawHermit => "<P0> <P1> <T0> <T1> <Color>",
-        InputMode.DrawBezier => "<P0> <P1> <P2> <P3> <Color>",
         InputMode.RotatePreview => "<Angle>",
         InputMode.Move => "<X> <Y>",
         _ => ""
@@ -274,9 +280,29 @@ public class InputManager : MonoBehaviour
     Vector2 GetMousePosition()
     {
         Vector2 mouse = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        return new Vector2(
-            Mathf.Clamp(mouse.x, grid.GridAreaMin.x, grid.GridAreaMax.x),
-            Mathf.Clamp(mouse.y, grid.GridAreaMin.y, grid.GridAreaMax.y));
+        float x = Mathf.Clamp(mouse.x, grid.GridAreaMin.x, grid.GridAreaMax.x);
+        float y = Mathf.Clamp(mouse.y, grid.GridAreaMin.y, grid.GridAreaMax.y);
+
+        if (currentMode != InputMode.DrawLine && currentMode != InputMode.DrawCircle && currentMode != InputMode.DrawEllipse &&
+            currentMode != InputMode.DrawHermit && currentMode != InputMode.DrawNBezier)
+            return new Vector2(x, y);
+
+        if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+        {
+            return SnapToGrid(mouse);
+        }
+
+        return new Vector2(x, y);
+    }
+
+    Vector2 SnapToGrid(Vector2 position)
+    {
+       
+        float gridSize = grid.GridSize;
+        float x = Mathf.Round(position.x / gridSize) * gridSize;
+        float y = Mathf.Round(position.y / gridSize) * gridSize;
+
+        return new Vector2(x, y);
     }
 
     void UpdateMouseDisplay()
@@ -346,7 +372,7 @@ public enum InputMode
     DrawCircle,
     DrawEllipse,
     DrawHermit,
-    DrawBezier,
+    DrawNBezier,
     RotatePreview,
     Move,
     ColorPick,

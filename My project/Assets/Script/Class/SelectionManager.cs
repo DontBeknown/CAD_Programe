@@ -47,6 +47,7 @@ public class SelectionManager
 
             inputManager.GetShapeValue(selectedShape);
             inputManager.currentMode = InputMode.Select;
+
         }
     }
 

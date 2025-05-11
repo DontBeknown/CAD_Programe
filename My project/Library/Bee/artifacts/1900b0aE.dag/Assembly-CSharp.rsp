@@ -446,6 +446,7 @@
 "Assets/Script/Class/Command.cs"
 "Assets/Script/Class/SelectionManager.cs"
 "Assets/Script/Class/Shape/BezierCurve.cs"
+"Assets/Script/Class/Shape/BezierNCurve.cs"
 "Assets/Script/Class/Shape/Circle.cs"
 "Assets/Script/Class/Shape/Ellipse.cs"
 "Assets/Script/Class/Shape/HermiteCurve.cs"
