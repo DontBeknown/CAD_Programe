@@ -178,7 +178,7 @@ public class Circle : Shape
 
     public override string GetValues()
     {
-        return $"{CenterPoint.x:F0} {CenterPoint.y:F0} {Radius:F0} {(Fill ? "true" : "false")} {ColorToString.Convert(Color)}";
+        return $"{CenterPoint.x:F0} {CenterPoint.y:F0} {Radius:F0} {(Fill ? "Fill" : "")} {ColorToString.Convert(Color)}";
     }
 
     public override Vector2 GetCenter()

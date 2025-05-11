@@ -84,6 +84,13 @@ public class ShapeDrawer
         curve.Draw();
         DebugLogUI.Instance.Log($"Created Bézier curve: P0={p0}, P1={p1}, P2={p2}, P3={p3}");
     }
+    public void DrawNBezier(List<Vector2> controlPoints, Color color)
+    {
+        var curve = new BezierNCurve(controlPoints, color);
+        SelectionManager.Instance.RegisterShape(curve.parentObject, curve);
+        curve.Draw();
+        DebugLogUI.Instance.Log($"Created Bézier-N curve with {controlPoints.Count} points.");
+    }
     private void HandleDrawing(System.Action<Vector2, Vector2> drawAction, InputMode mode, Vector2 snapped)
     {
         if (startPoint == null)
@@ -145,6 +152,7 @@ public class ShapeDrawer
         startPoint = null;
         hermitePoints.Clear();
         bezierPoints.Clear();
+        bezierNPoints.Clear();
         previewManager.ClearPreview();
         ClearBezierNControlPointVisuals();
     }

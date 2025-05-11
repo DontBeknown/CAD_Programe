@@ -97,6 +97,11 @@ public class InputManager : MonoBehaviour
 
     void HandleModeSwitch()
     {
+        if (isActiveInputCommand)
+        {
+            DebugLogUI.Instance.Log($"Can't change mode now please disable command mode first.");
+            return;
+        }
         if (Input.GetKeyDown(selectModeKey)) SetMode(InputMode.Select);
         else if (Input.GetKeyDown(lineKey)) SetMode(InputMode.DrawLine);
         else if (Input.GetKeyDown(circleKey)) SetMode(InputMode.DrawCircle);
@@ -128,7 +133,7 @@ public class InputManager : MonoBehaviour
             
 
         if ((Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) &&
-            Input.GetKeyDown(KeyCode.S))
+            Input.GetKeyDown(KeyCode.S) && !isActiveInputCommand)
         {
             selectionManager.SaveToFile();
             DebugLogUI.Instance.Log("Save completed");
@@ -244,6 +249,7 @@ public class InputManager : MonoBehaviour
         InputMode.DrawCircle => "<X0> <Y0> <R> <isFill> <Color>",
         InputMode.DrawEllipse => "<X0> <Y0> <Rx> <Ry> <isFill> <Color>",
         InputMode.DrawHermit => "<P0> <P1> <T0> <T1> <Color>",
+        InputMode.DrawNBezier => "<P0> <P1> <P2> ... <Pn> <Color>",
         InputMode.RotatePreview => "<Angle>",
         InputMode.Move => "<X> <Y>",
         _ => ""

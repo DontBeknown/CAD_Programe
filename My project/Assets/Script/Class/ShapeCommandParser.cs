@@ -20,7 +20,7 @@ public class ShapeCommandParser
     {
         List<float> numbers = ParseNumbers(input);
         string colorName = ExtractLastWord(input);
-        bool isFill = ExtractSecondLastWordAsBool(input);
+        bool isFill = IsSecondLastWordFill(input);
         Color shapeColor = TryParseColor(colorName);
 
         if (numbers == null)
@@ -35,6 +35,7 @@ public class ShapeCommandParser
             case InputMode.DrawCircle:
             case InputMode.DrawEllipse:
             case InputMode.DrawHermit:
+            case InputMode.DrawNBezier:
                 HandleDrawCommand(mode, numbers, isFill, shapeColor);
                 break;
 
@@ -90,6 +91,27 @@ public class ShapeCommandParser
                 }
                 shapeDrawer.DrawHermite(ToV2(numbers[0], numbers[1]), ToV2(numbers[2], numbers[3]),
                                         ToV2(numbers[4], numbers[5]), ToV2(numbers[6], numbers[7]), color);
+                break;
+
+            case InputMode.DrawNBezier:
+                if (numbers.Count < 2)
+                {
+                    LogInvalid("Can not create bezier curve with one control point");
+                    return;
+                }
+                if (numbers.Count % 2 != 0)
+                {
+                    LogInvalid("numbers length is not even. Cannot convert to Vector2 list.");
+                    return;
+                }
+                List<Vector2> vector2List = new List<Vector2>();
+
+                for (int i = 0; i < numbers.Count - 1; i += 2)
+                {
+                    vector2List.Add(ToV2(numbers[i], numbers[i + 1]));
+                }
+
+                shapeDrawer.DrawNBezier(vector2List, color);
                 break;
 
         }
@@ -208,20 +230,17 @@ public class ShapeCommandParser
         return string.IsNullOrWhiteSpace(input) ? "" : input.Split(' ').Last();
     }
 
-    private bool ExtractSecondLastWordAsBool(string input, bool defaultValue = false)
+    private bool IsSecondLastWordFill(string input)
     {
         if (string.IsNullOrWhiteSpace(input))
-            return defaultValue;
+            return false;
 
         string[] words = input.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
         if (words.Length < 2)
-            return defaultValue;
+            return false;
 
-        if (bool.TryParse(words[words.Length - 2], out bool result))
-            return result;
-
-        return defaultValue;
+        return string.Equals(words[words.Length - 2], "Fill", StringComparison.OrdinalIgnoreCase);
     }
 
     private Color TryParseColor(string colorName)

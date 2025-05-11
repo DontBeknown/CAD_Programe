@@ -209,7 +209,7 @@ public class Ellipse : Shape
 
     public override string GetValues()
     {
-        return $"{CenterPoint.x:F0} {CenterPoint.y:F0} {RadiusX:F0} {RadiusY:F0} {ColorToString.Convert(Color)}";
+        return $"{CenterPoint.x:F0} {CenterPoint.y:F0} {RadiusX:F0} {RadiusY:F0} {(Fill ? "Fill" : "")} {ColorToString.Convert(Color)}";
     }
 
     public override Vector2 GetCenter()
