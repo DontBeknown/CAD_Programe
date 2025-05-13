@@ -204,7 +204,7 @@ public class Ellipse : Shape
 
     public override string GetDetails()
     {
-        return $"Ellipse Center: {CenterPoint:F0}, RadiusX: {RadiusX:F0}, RadiusY: {RadiusY:F0}";
+        return $"Ellipse Center: {CenterPoint:F0}, \nRadiusX: {RadiusX:F0}, RadiusY: {RadiusY:F0}, Fill: {Fill}";
     }
 
     public override string GetValues()

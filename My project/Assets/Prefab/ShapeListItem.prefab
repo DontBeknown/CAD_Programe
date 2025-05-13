@@ -66,8 +66,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
-  m_Type: 1
+  m_Sprite: {fileID: -8213899198883486112, guid: ce37938958c0a39499d467737d99ff33, type: 3}
+  m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -193,14 +193,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.38679248, g: 0.38679248, b: 0.38679248, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Texture: {fileID: 0}
+  m_Texture: {fileID: 2800000, guid: ce37938958c0a39499d467737d99ff33, type: 3}
   m_UVRect:
     serializedVersion: 2
     x: 0
@@ -252,10 +252,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 2752166866721229889}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 1.5, y: 0}
-  m_SizeDelta: {x: -22.999977, y: -20}
+  m_AnchorMin: {x: 0, y: 0.5}
+  m_AnchorMax: {x: 1, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: -30, y: 52}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1364644605437019170
 CanvasRenderer:
@@ -287,8 +287,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: HermiteCurve XXX
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: fa3e7030530db6b408b32e66fc74fd86, type: 2}
-  m_sharedMaterial: {fileID: 8653490517505579065, guid: fa3e7030530db6b408b32e66fc74fd86, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: c8e3f4f20fb85e047a87e5b4a9adcecc, type: 2}
+  m_sharedMaterial: {fileID: 3188817228595509271, guid: c8e3f4f20fb85e047a87e5b4a9adcecc, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -312,14 +312,14 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 29.56
-  m_fontSizeBase: 29.56
+  m_fontSize: 18
+  m_fontSizeBase: 18
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
-  m_HorizontalAlignment: 2
+  m_HorizontalAlignment: 1
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0

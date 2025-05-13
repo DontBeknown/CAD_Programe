@@ -31,6 +31,7 @@ public class InputManager : MonoBehaviour
     public InputMode currentMode { get; set; } = InputMode.Select;
     public Color currentColor = Color.black;
     private bool isActiveInputCommand = false;
+    private bool isOpenInputField = false;
 
     private ShapeDrawer shapeDrawer;
     private ShapeCommandParser commandParser;
@@ -41,6 +42,7 @@ public class InputManager : MonoBehaviour
     private ShapeMover shapeMover;
     private ShapeListUIManager shapeListUIManager;
     private ButtonManager buttonManager;
+    private InputFieldManager inputFieldManager;
 
     void Start()
     {
@@ -49,6 +51,7 @@ public class InputManager : MonoBehaviour
 
         shapeListUIManager = uiManager.GetComponent<ShapeListUIManager>();
         buttonManager = uiManager.GetComponent<ButtonManager>();
+        inputFieldManager = uiManager.GetComponent<InputFieldManager>();
 
         selectionManager = new SelectionManager(shapeSaveLoadManager, shapeListUIManager, this);
         shapeDrawer = new ShapeDrawer();
@@ -57,6 +60,8 @@ public class InputManager : MonoBehaviour
         commandParser = new ShapeCommandParser(shapeDrawer, selectionManager, rotationController);
 
         buttonManager.saveButton.onClick.AddListener(() => selectionManager.SaveToFile());
+
+        inputFieldManager.shapeDrawer = shapeDrawer;
 
     }
 
@@ -90,6 +95,7 @@ public class InputManager : MonoBehaviour
         inputField.text = "";
         DebugLogUI.Instance.Log($"Switched to {currentMode} mode");
         buttonManager.SetButtonMode(currentMode);
+        isOpenInputField = false;
 
         if (!IsEditMode(currentMode))
             selectionManager.Deselect();
@@ -99,7 +105,7 @@ public class InputManager : MonoBehaviour
     {
         if (isActiveInputCommand)
         {
-            DebugLogUI.Instance.Log($"Can't change mode now please disable command mode first.");
+            //DebugLogUI.Instance.Log($"Can't change mode now please disable command mode first.");
             return;
         }
         if (Input.GetKeyDown(selectModeKey)) SetMode(InputMode.Select);
@@ -167,7 +173,7 @@ public class InputManager : MonoBehaviour
     {
         Vector2 mouse = GetMousePosition();
 
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0) && !isOpenInputField)
         {
             switch (currentMode)
             {
@@ -185,7 +191,13 @@ public class InputManager : MonoBehaviour
             }
         }
 
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (Input.GetMouseButtonDown(1))
+        {
+            buttonManager.TogglePanel(currentMode);
+            isOpenInputField = !isOpenInputField;
+        }
+
+            if (Input.GetKeyDown(KeyCode.Escape))
         {
             if (currentMode == InputMode.Move && shapeMover.IsMoving)
             {
@@ -222,14 +234,21 @@ public class InputManager : MonoBehaviour
     #region Text Commands
     void HandleTextCommand()
     {
-        if (Input.GetMouseButtonDown(1))
+        if (Input.GetKeyDown(KeyCode.Slash))
+        {
             ToggleInputField();
+        }
 
-        if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
+        if ((Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter)) && !isActiveInputCommand)
+        {
+            inputFieldManager.DrawShapeFromInput(currentMode,currentColor);
+        }
+
+        if ((Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter)) && isActiveInputCommand)
         {
             commandParser.ParseCommand(currentMode, inputField.text, selectionManager.GetSelectedShape());
             inputField.text = "";
-
+            DeactivateInputField();
             if (currentMode == InputMode.Move || currentMode == InputMode.RotatePreview)
                 currentMode = InputMode.Select;
 
@@ -351,6 +370,8 @@ public class InputManager : MonoBehaviour
             placeholder.text = "";
 
         isActiveInputCommand = false;
+
+        inputField.text = "";
     }
 
     public void GetShapeValue(Shape shape)

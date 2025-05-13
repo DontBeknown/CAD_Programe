@@ -15,6 +15,7 @@ public class ButtonManager : MonoBehaviour
     public GameObject filePanel;
     public Button saveButton;
     public Button loadButton;
+    public Sprite selectImage, defaultImage;
 
     [SerializeField] InputManager inputManager;
     public List<ModeButton> modeButtons;
@@ -41,38 +42,39 @@ public class ButtonManager : MonoBehaviour
         foreach (var mb in modeButtons)
         {
             bool isActive = mb.mode == newMode;
-            SetButtonState(mb.button, isActive);
-            if(mb.mode == InputMode.ColorPick)
+            if(mb.panel != null && !isActive)
             {
-                mb.panel.SetActive(isActive);
+                mb.panel.SetActive(false);
             }
+
+            if (isActive)
+            {
+                mb.button.image.sprite = selectImage;
+                if(mb.mode == InputMode.ColorPick)
+                    mb.panel.SetActive(true);
+            }
+            else
+            {
+                mb.button.image.sprite = defaultImage;
+            }
+
         }
     }
 
-    private void SetButtonState(Button button, bool active)
+    public void TogglePanel(InputMode mode)
     {
-        var colors = button.colors;
-
-        if (active)
+        foreach (var mb in modeButtons)
         {
-            colors.normalColor = Color.white;
-            colors.highlightedColor = Color.white;
-            colors.pressedColor = new Color(0.9f, 0.9f, 0.9f, 1f);
+            if(mb.panel != null && mb.mode == mode)
+            {
+                mb.panel.SetActive(!mb.panel.activeSelf);
+            }
         }
-        else
-        {
-            Color dimColor = new Color(0.6f, 0.6f, 0.6f, 1f);
-            colors.normalColor = dimColor;
-            colors.highlightedColor = dimColor;
-            colors.pressedColor = new Color(0.5f, 0.5f, 0.5f, 1f);
-        }
-
-        button.colors = colors;
     }
 
     public void ToggleFilePanel()
     {
         filePanel.SetActive(!filePanel.activeSelf);
     }
-
+    
 }

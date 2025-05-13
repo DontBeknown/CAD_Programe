@@ -43,7 +43,7 @@ public class SelectionManager
             string detail = shape.GetDetails();
             selectedShape = shape;
             shape.Highlight(Color.darkOrange);
-            DebugLogUI.Instance.Log("Select " + detail);
+            //DebugLogUI.Instance.Log("Select " + detail);
 
             inputManager.GetShapeValue(selectedShape);
             inputManager.currentMode = InputMode.Select;

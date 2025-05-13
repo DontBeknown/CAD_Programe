@@ -35,7 +35,7 @@ public class ShapeListUIManager : MonoBehaviour
         {
             GameObject listItem = Instantiate(listItemPrefab, listContentParent);
             var ui = listItem.GetComponent<ShapeListItemUI>();
-            ui.Setup(kvp.Key, kvp.Value.GetType().Name + $" {i}");
+            ui.Setup(kvp.Key, kvp.Value.GetDetails());
             i++;
         }
     }

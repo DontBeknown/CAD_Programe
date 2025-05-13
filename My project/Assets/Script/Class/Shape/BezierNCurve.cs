@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Net;
 using UnityEngine;
 
 public class BezierNCurve : Shape
@@ -77,7 +78,8 @@ public class BezierNCurve : Shape
 
     public override string GetDetails()
     {
-        return $"Bezier-N Curve with {controlPoints.Count} control points.";
+        return $"Bezier-N Curve with {controlPoints.Count} control points.\n" +
+            $"Start from {controlPoints[0]:F0} to {controlPoints[controlPoints.Count-1]:F0}";
     }
 
     public List<Vector2> GetControlPoints()
