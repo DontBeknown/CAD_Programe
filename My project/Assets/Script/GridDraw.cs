@@ -21,21 +21,25 @@ public class GridDraw : MonoBehaviour
 
     private Queue<LineRenderer> linePool = new Queue<LineRenderer>();
 
+    public GameObject GridParent => gridParent; // NEW: Expose gridParent
+
     void Start()
     {
         mainCamera = Camera.main;
         gridParent = new GameObject("GridLines");
         RenderGrid();
-        
-        if(!isGridVisible) gridParent.SetActive(isGridVisible);
+
+        gridParent.SetActive(isGridVisible);
 
         if (gridSizeInput != null)
         {
             gridSizeInput.text = GridSize.ToString();
             gridSizeInput.onValueChanged.AddListener(OnGridSizeChanged);
         }
-        if (gridWidthInput != null) gridWidthInput.text = (GridAreaMax.x - GridAreaMin.x).ToString();
-        if (gridHeightInput != null) gridHeightInput.text = (GridAreaMax.y - GridAreaMin.y).ToString();
+        if (gridWidthInput != null)
+            gridWidthInput.text = (GridAreaMax.x - GridAreaMin.x).ToString();
+        if (gridHeightInput != null)
+            gridHeightInput.text = (GridAreaMax.y - GridAreaMin.y).ToString();
     }
 
     LineRenderer GetLineRenderer()
@@ -52,6 +56,7 @@ public class GridDraw : MonoBehaviour
         lr.useWorldSpace = true;
         return lr;
     }
+
     void RenderGrid()
     {
         for (float x = GridAreaMin.x + 0.5f; x <= GridAreaMax.x; x += GridSize)
@@ -81,7 +86,8 @@ public class GridDraw : MonoBehaviour
     public void ToggleGrid()
     {
         isGridVisible = !isGridVisible;
-        gridParent.SetActive(isGridVisible);
+        if (gridParent != null)
+            gridParent.SetActive(isGridVisible);
     }
 
     public void RegenerateGrid()
@@ -144,5 +150,4 @@ public class GridDraw : MonoBehaviour
             RegenerateGrid();
         }
     }
-
 }
