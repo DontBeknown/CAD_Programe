@@ -1,15 +1,20 @@
 <linker>
 	<assembly fullname="Assembly-CSharp">
+		<type fullname="ButtonManager" preserve="nothing"/>
 		<type fullname="CameraControl" preserve="nothing"/>
+		<type fullname="ColorPickerController" preserve="nothing"/>
 		<type fullname="DebugLogUI" preserve="nothing"/>
 		<type fullname="GridDraw" preserve="nothing"/>
+		<type fullname="InputFieldManager" preserve="nothing"/>
 		<type fullname="InputManager" preserve="nothing"/>
 		<type fullname="PixelPool" preserve="nothing"/>
+		<type fullname="SceneCapture" preserve="nothing"/>
 		<type fullname="ShapeListItemUI" preserve="nothing"/>
 		<type fullname="ShapeListUIManager" preserve="nothing"/>
 		<type fullname="ShapeSaveLoadManager" preserve="nothing"/>
 	</assembly>
 	<assembly fullname="Unity.2D.Animation.Runtime">
+		<type fullname="UnityEngine.U2D.Animation.BufferManager" preserve="nothing"/>
 		<type fullname="UnityEngine.U2D.Animation.DeformationManager" preserve="nothing"/>
 		<type fullname="UnityEngine.U2D.Animation.DeformationManagerUpdater" preserve="nothing"/>
 	</assembly>
@@ -150,6 +155,7 @@
 		<type fullname="UnityEngine.UI.RectMask2D" preserve="nothing"/>
 		<type fullname="UnityEngine.UI.Scrollbar" preserve="nothing"/>
 		<type fullname="UnityEngine.UI.ScrollRect" preserve="nothing"/>
+		<type fullname="UnityEngine.UI.Shadow" preserve="nothing"/>
 		<type fullname="UnityEngine.UI.Text" preserve="nothing"/>
 		<type fullname="UnityEngine.UI.Toggle" preserve="nothing"/>
 		<type fullname="UnityEngine.UI.VerticalLayoutGroup" preserve="nothing"/>

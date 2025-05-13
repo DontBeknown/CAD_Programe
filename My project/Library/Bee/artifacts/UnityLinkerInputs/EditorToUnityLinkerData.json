@@ -11,7 +11,21 @@
         {
             "managedAssemblyName": "Assembly-CSharp.dll",
             "nativeClass": "",
+            "fullManagedTypeName": "ButtonManager",
+            "moduleName": "",
+            "usedInScenes": []
+        },
+        {
+            "managedAssemblyName": "Assembly-CSharp.dll",
+            "nativeClass": "",
             "fullManagedTypeName": "CameraControl",
+            "moduleName": "",
+            "usedInScenes": []
+        },
+        {
+            "managedAssemblyName": "Assembly-CSharp.dll",
+            "nativeClass": "",
+            "fullManagedTypeName": "ColorPickerController",
             "moduleName": "",
             "usedInScenes": []
         },
@@ -58,6 +72,13 @@
             "managedAssemblyName": "Assembly-CSharp.dll",
             "nativeClass": "",
             "fullManagedTypeName": "GridDraw",
+            "moduleName": "",
+            "usedInScenes": []
+        },
+        {
+            "managedAssemblyName": "Assembly-CSharp.dll",
+            "nativeClass": "",
+            "fullManagedTypeName": "InputFieldManager",
             "moduleName": "",
             "usedInScenes": []
         },
@@ -135,6 +156,13 @@
             "nativeClass": "RuntimeInitializeOnLoadManager",
             "fullManagedTypeName": "",
             "moduleName": "Core",
+            "usedInScenes": []
+        },
+        {
+            "managedAssemblyName": "Assembly-CSharp.dll",
+            "nativeClass": "",
+            "fullManagedTypeName": "SceneCapture",
+            "moduleName": "",
             "usedInScenes": []
         },
         {
@@ -1015,6 +1043,13 @@
         {
             "managedAssemblyName": "Unity.2D.Animation.Runtime.dll",
             "nativeClass": "",
+            "fullManagedTypeName": "UnityEngine.U2D.Animation.BufferManager",
+            "moduleName": "",
+            "usedInScenes": []
+        },
+        {
+            "managedAssemblyName": "Unity.2D.Animation.Runtime.dll",
+            "nativeClass": "",
             "fullManagedTypeName": "UnityEngine.U2D.Animation.DeformationManager",
             "moduleName": "",
             "usedInScenes": []
@@ -1107,6 +1142,13 @@
             "managedAssemblyName": "UnityEngine.UI.dll",
             "nativeClass": "",
             "fullManagedTypeName": "UnityEngine.UI.ScrollRect",
+            "moduleName": "",
+            "usedInScenes": []
+        },
+        {
+            "managedAssemblyName": "UnityEngine.UI.dll",
+            "nativeClass": "",
+            "fullManagedTypeName": "UnityEngine.UI.Shadow",
             "moduleName": "",
             "usedInScenes": []
         },

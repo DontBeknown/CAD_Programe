@@ -2,31 +2,30 @@ using UnityEngine;
 using System.IO;
 using System.Collections.Generic;
 using TMPro;
+using SFB;
 
 using UnityEngine.UI;
 public class ShapeSaveLoadManager : MonoBehaviour
 {
-    public TMP_InputField fileNameInput;
-    public TMP_Dropdown fileDropdown;
-
     private GridDraw gridDraw;
-    private string GetSavePath(string fileName) =>
-    Path.Combine(Application.persistentDataPath, fileName + ".json");
 
     void Start()
     {
-        RefreshDropdown();
 
         gridDraw = GetComponent<GridDraw>();
     }
 
     public void SaveShapes(List<Shape> shapes)
     {
-        string fileName = fileNameInput.text.Trim();
+        var extensions = new[] {
+            new ExtensionFilter("JSON Files", "json")
+        };
 
-        if (string.IsNullOrEmpty(fileName))
+        string path = StandaloneFileBrowser.SaveFilePanel("Save Shape File", "", "shapes", extensions);
+
+        if (string.IsNullOrEmpty(path))
         {
-            DebugLogUI.Instance.Log("Save failed: File name is empty.");
+            DebugLogUI.Instance.Log("Save cancelled.");
             return;
         }
 
@@ -125,23 +124,28 @@ public class ShapeSaveLoadManager : MonoBehaviour
         };
 
         string json = JsonUtility.ToJson(wrapper, true);
-        File.WriteAllText(GetSavePath(fileName), json);
+        File.WriteAllText(path, json);
 
-        RefreshDropdown();
     }
 
     public List<Shape> LoadShapes()
     {
-        string fileName = fileDropdown.options[fileDropdown.value].text;
-        string path = GetSavePath(fileName);
 
-        if (!File.Exists(path))
+        var extensions = new[] {
+        new ExtensionFilter("JSON Files", "json")
+    };
+
+        string[] paths = StandaloneFileBrowser.OpenFilePanel("Load Shape File", "", extensions, false);
+
+        if (paths.Length == 0 || string.IsNullOrEmpty(paths[0]))
         {
-            DebugLogUI.Instance.Log("Load failed: File does not exist.");
-            return new List<Shape>();
+            DebugLogUI.Instance.Log("Load cancelled.");
+            return null;
         }
 
+        string path = paths[0];
         string json = File.ReadAllText(path);
+
         var wrapper = JsonUtility.FromJson<ShapeDataWrapper>(json);
 
         if (wrapper.gridData != null)
@@ -193,21 +197,6 @@ public class ShapeSaveLoadManager : MonoBehaviour
 
         return loadedShapes;
     }
-
-    public void RefreshDropdown()
-    {
-        fileDropdown.ClearOptions();
-
-        string[] files = Directory.GetFiles(Application.persistentDataPath, "*.json");
-        List<string> fileNames = new List<string>();
-
-        foreach (var file in files)
-        {
-            fileNames.Add(Path.GetFileNameWithoutExtension(file));
-        }
-
-        fileDropdown.AddOptions(fileNames);
-    }   
 
     [System.Serializable]
     private class ShapeDataWrapper

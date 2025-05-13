@@ -1,5 +1,24 @@
 <linker>
 	<assembly fullname="Assembly-CSharp" ignoreIfMissing="1">
+		<type fullname="ButtonManager">
+			<method name="ToggleFilePanel"/>
+		</type>
+		<type fullname="CameraControl">
+			<method name="UpdatePanLimit"/>
+		</type>
+		<type fullname="GridDraw">
+			<method name="ApplyGridSettingsFromUI"/>
+		</type>
+		<type fullname="InputFieldManager">
+			<method name="AddControlPointInput"/>
+		</type>
+		<type fullname="InputManager">
+			<method name="LoadFile"/>
+			<method name="Newfile"/>
+		</type>
+		<type fullname="SceneCapture">
+			<method name="SaveSceneAsPNG"/>
+		</type>
 		<type fullname="ShapeListItemUI">
 			<method name="OnClick"/>
 			<method name="OnClick"/>

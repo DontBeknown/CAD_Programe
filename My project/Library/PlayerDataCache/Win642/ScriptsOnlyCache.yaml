@@ -1,17 +1,22 @@
 ScriptsOnlyBuild:
   usedScripts:
     Assembly-CSharp.dll:
+    - ButtonManager
     - CameraControl
+    - ColorPickerController
     - DebugLogUI
     - GridDraw
+    - InputFieldManager
     - InputManager
     - PixelPool
+    - SceneCapture
     - ShapeListItemUI
     - ShapeListUIManager
     - ShapeSaveLoadManager
     Unity.2D.Animation.Editor.dll:
     - UnityEditor.U2D.Animation.BoneGizmo
     Unity.2D.Animation.Runtime.dll:
+    - UnityEngine.U2D.Animation.BufferManager
     - UnityEngine.U2D.Animation.DeformationManager
     - UnityEngine.U2D.Animation.DeformationManagerUpdater
     Unity.2D.IK.Editor.dll:
@@ -135,14 +140,19 @@ ScriptsOnlyBuild:
     - UnityEngine.UI.Button
     - UnityEngine.UI.CanvasScaler
     - UnityEngine.UI.GraphicRaycaster
+    - UnityEngine.UI.HorizontalLayoutGroup
     - UnityEngine.UI.Image
     - UnityEngine.UI.LayoutElement
     - UnityEngine.UI.Mask
     - UnityEngine.UI.RawImage
     - UnityEngine.UI.RectMask2D
     - UnityEngine.UI.ScrollRect
+    - UnityEngine.UI.Shadow
+    - UnityEngine.UI.Toggle
     - UnityEngine.UI.VerticalLayoutGroup
   serializedClasses:
+    Assembly-CSharp:
+    - ButtonManager/ModeButton
     Unity.InputSystem:
     - UnityEngine.InputSystem.InputAction
     - UnityEngine.InputSystem.InputActionMap
@@ -219,7 +229,11 @@ ScriptsOnlyBuild:
     Unity.TextMeshPro:
     - TMPro.FaceInfo_Legacy
     - TMPro.FontAssetCreationSettings
+    - TMPro.GlyphAnchorPoint
     - TMPro.KerningTable
+    - TMPro.LigatureSubstitutionRecord
+    - TMPro.MarkPositionAdjustment
+    - TMPro.MarkToBaseAdjustmentRecord
     - TMPro.TMP_Character
     - TMPro.TMP_FontFeatureTable
     - TMPro.TMP_FontWeightPair
@@ -268,6 +282,27 @@ ScriptsOnlyBuild:
   - assembly: Assembly-CSharp
     fullTypeName: ShapeListItemUI
     methodName: OnClick
+  - assembly: Assembly-CSharp
+    fullTypeName: InputFieldManager
+    methodName: AddControlPointInput
+  - assembly: Assembly-CSharp
+    fullTypeName: SceneCapture
+    methodName: SaveSceneAsPNG
+  - assembly: Assembly-CSharp
+    fullTypeName: InputManager
+    methodName: LoadFile
+  - assembly: Assembly-CSharp
+    fullTypeName: ButtonManager
+    methodName: ToggleFilePanel
+  - assembly: Assembly-CSharp
+    fullTypeName: InputManager
+    methodName: Newfile
+  - assembly: Assembly-CSharp
+    fullTypeName: GridDraw
+    methodName: ApplyGridSettingsFromUI
+  - assembly: Assembly-CSharp
+    fullTypeName: CameraControl
+    methodName: UpdatePanLimit
   - assembly: Unity.RenderPipelines.Core.Runtime
     fullTypeName: UnityEngine.Rendering.UI.DebugUIHandlerButton
     methodName: OnAction
@@ -339,143 +374,153 @@ ScriptsOnlyBuild:
     - Class: 104
       Script: {instanceID: 0}
     - Class: 114
-      Script: {instanceID: 15276}
+      Script: {instanceID: 15298}
     - Class: 114
-      Script: {instanceID: 15458}
+      Script: {instanceID: 15480}
     - Class: 114
-      Script: {instanceID: 15728}
+      Script: {instanceID: 15750}
     - Class: 114
-      Script: {instanceID: 15776}
+      Script: {instanceID: 15798}
     - Class: 114
-      Script: {instanceID: 15990}
+      Script: {instanceID: 15946}
     - Class: 114
-      Script: {instanceID: 16146}
+      Script: {instanceID: 16014}
     - Class: 114
-      Script: {instanceID: 16268}
+      Script: {instanceID: 16070}
     - Class: 114
-      Script: {instanceID: 16408}
+      Script: {instanceID: 16172}
     - Class: 114
-      Script: {instanceID: 16478}
+      Script: {instanceID: 16294}
     - Class: 114
-      Script: {instanceID: 16596}
+      Script: {instanceID: 16434}
     - Class: 114
-      Script: {instanceID: 16620}
+      Script: {instanceID: 16490}
     - Class: 114
-      Script: {instanceID: 16888}
+      Script: {instanceID: 16506}
     - Class: 114
-      Script: {instanceID: 17120}
+      Script: {instanceID: 16624}
     - Class: 114
-      Script: {instanceID: 17496}
+      Script: {instanceID: 16648}
     - Class: 114
-      Script: {instanceID: 17556}
+      Script: {instanceID: 16916}
     - Class: 114
-      Script: {instanceID: 17722}
+      Script: {instanceID: 17148}
     - Class: 114
-      Script: {instanceID: 17964}
+      Script: {instanceID: 17524}
     - Class: 114
-      Script: {instanceID: 18062}
+      Script: {instanceID: 17584}
     - Class: 114
-      Script: {instanceID: 18100}
+      Script: {instanceID: 17750}
     - Class: 114
-      Script: {instanceID: 18160}
+      Script: {instanceID: 17782}
+    - Class: 114
+      Script: {instanceID: 17994}
+    - Class: 114
+      Script: {instanceID: 18092}
+    - Class: 114
+      Script: {instanceID: 18130}
     - Class: 114
       Script: {instanceID: 18190}
     - Class: 114
-      Script: {instanceID: 18226}
+      Script: {instanceID: 18220}
     - Class: 114
-      Script: {instanceID: 19148}
+      Script: {instanceID: 18256}
     - Class: 114
-      Script: {instanceID: 19470}
+      Script: {instanceID: 19178}
     - Class: 114
-      Script: {instanceID: 19480}
+      Script: {instanceID: 19502}
     - Class: 114
-      Script: {instanceID: 20234}
+      Script: {instanceID: 19512}
     - Class: 114
-      Script: {instanceID: 20288}
+      Script: {instanceID: 20268}
     - Class: 114
       Script: {instanceID: 20322}
     - Class: 114
-      Script: {instanceID: 20510}
+      Script: {instanceID: 20356}
     - Class: 114
-      Script: {instanceID: 20578}
+      Script: {instanceID: 20504}
     - Class: 114
-      Script: {instanceID: 20674}
+      Script: {instanceID: 20544}
     - Class: 114
-      Script: {instanceID: 20742}
+      Script: {instanceID: 20612}
     - Class: 114
-      Script: {instanceID: 20824}
+      Script: {instanceID: 20708}
     - Class: 114
-      Script: {instanceID: 20920}
+      Script: {instanceID: 20776}
     - Class: 114
-      Script: {instanceID: 21038}
+      Script: {instanceID: 20858}
     - Class: 114
-      Script: {instanceID: 21696}
+      Script: {instanceID: 20954}
     - Class: 114
-      Script: {instanceID: 21908}
+      Script: {instanceID: 21072}
     - Class: 114
-      Script: {instanceID: 22012}
+      Script: {instanceID: 21730}
     - Class: 114
-      Script: {instanceID: 22014}
+      Script: {instanceID: 21942}
     - Class: 114
-      Script: {instanceID: 22284}
+      Script: {instanceID: 22046}
     - Class: 114
-      Script: {instanceID: 22856}
+      Script: {instanceID: 22048}
     - Class: 114
-      Script: {instanceID: 23012}
+      Script: {instanceID: 22320}
     - Class: 114
-      Script: {instanceID: 23078}
+      Script: {instanceID: 22892}
     - Class: 114
-      Script: {instanceID: 23116}
+      Script: {instanceID: 23048}
     - Class: 114
-      Script: {instanceID: 23706}
+      Script: {instanceID: 23114}
     - Class: 114
-      Script: {instanceID: 23734}
+      Script: {instanceID: 23152}
     - Class: 114
-      Script: {instanceID: 24742}
+      Script: {instanceID: 23744}
     - Class: 114
-      Script: {instanceID: 24898}
+      Script: {instanceID: 23772}
     - Class: 114
-      Script: {instanceID: 25180}
+      Script: {instanceID: 24782}
     - Class: 114
-      Script: {instanceID: 25236}
+      Script: {instanceID: 24938}
     - Class: 114
-      Script: {instanceID: 25528}
+      Script: {instanceID: 25220}
     - Class: 114
-      Script: {instanceID: 25610}
+      Script: {instanceID: 25276}
     - Class: 114
-      Script: {instanceID: 25684}
+      Script: {instanceID: 25568}
     - Class: 114
-      Script: {instanceID: 25712}
+      Script: {instanceID: 25650}
     - Class: 114
-      Script: {instanceID: 26160}
+      Script: {instanceID: 25724}
     - Class: 114
-      Script: {instanceID: 26278}
+      Script: {instanceID: 25752}
     - Class: 114
-      Script: {instanceID: 26280}
+      Script: {instanceID: 26200}
     - Class: 114
-      Script: {instanceID: 26342}
+      Script: {instanceID: 26318}
     - Class: 114
-      Script: {instanceID: 26386}
+      Script: {instanceID: 26320}
     - Class: 114
-      Script: {instanceID: 26522}
+      Script: {instanceID: 26382}
     - Class: 114
-      Script: {instanceID: 26554}
+      Script: {instanceID: 26426}
     - Class: 114
-      Script: {instanceID: 26614}
+      Script: {instanceID: 26562}
     - Class: 114
-      Script: {instanceID: 26642}
+      Script: {instanceID: 26594}
     - Class: 114
-      Script: {instanceID: 26700}
+      Script: {instanceID: 26654}
     - Class: 114
-      Script: {instanceID: 26812}
+      Script: {instanceID: 26682}
     - Class: 114
-      Script: {instanceID: 27092}
+      Script: {instanceID: 26740}
     - Class: 114
-      Script: {instanceID: 27180}
+      Script: {instanceID: 26852}
     - Class: 114
-      Script: {instanceID: 27422}
+      Script: {instanceID: 27132}
     - Class: 114
-      Script: {instanceID: 27600}
+      Script: {instanceID: 27220}
+    - Class: 114
+      Script: {instanceID: 27464}
+    - Class: 114
+      Script: {instanceID: 27644}
     - Class: 115
       Script: {instanceID: 0}
     - Class: 128
@@ -633,6 +678,12 @@ ScriptsOnlyBuild:
     className: UnityOnSliderValueChangedMessageListener
   - hash:
       serializedVersion: 2
+      Hash: 899f72a59ff7c3d81393f1e5fb95fd62
+    assemblyName: Assembly-CSharp
+    namespaceName: 
+    className: InputFieldManager
+  - hash:
+      serializedVersion: 2
       Hash: f99ce8526ec148f29051c0a9dced1a03
     assemblyName: Unity.RenderPipelines.Universal.Runtime
     namespaceName: UnityEngine.Rendering.Universal
@@ -667,6 +718,12 @@ ScriptsOnlyBuild:
     assemblyName: Unity.VisualScripting.Core
     namespaceName: Unity.VisualScripting
     className: UnityOnTransformChildrenChangedMessageListener
+  - hash:
+      serializedVersion: 2
+      Hash: affc0267c6ea0d51f960e2ae1a7ce89f
+    assemblyName: Assembly-CSharp
+    namespaceName: 
+    className: ColorPickerController
   - hash:
       serializedVersion: 2
       Hash: 9dd54ce33440072d6692a67e0c384ad1
@@ -745,6 +802,12 @@ ScriptsOnlyBuild:
     assemblyName: UnityEngine.UI
     namespaceName: UnityEngine.UI
     className: Slider
+  - hash:
+      serializedVersion: 2
+      Hash: 922d9757907b4f98899cfd4a11edf5e9
+    assemblyName: Assembly-CSharp
+    namespaceName: 
+    className: SceneCapture
   - hash:
       serializedVersion: 2
       Hash: ef19274111491b6b8bcc6fd227f656f5
@@ -943,6 +1006,12 @@ ScriptsOnlyBuild:
     assemblyName: Unity.RenderPipelines.Core.Runtime
     namespaceName: UnityEngine.Rendering.UI
     className: DebugUIHandlerIntField
+  - hash:
+      serializedVersion: 2
+      Hash: 278516aa44b2088c99ec382c7d06e385
+    assemblyName: Assembly-CSharp
+    namespaceName: 
+    className: ButtonManager
   - hash:
       serializedVersion: 2
       Hash: e63fe08659e7e4647a51098c666f8845
@@ -1695,7 +1764,7 @@ ScriptsOnlyBuild:
     className: SignalEmitter
   - hash:
       serializedVersion: 2
-      Hash: 6d8f1dc4186bfff9432da8a83ade9a0b
+      Hash: 1d106bf5f69005b38bda0742bafae3eb
     assemblyName: Assembly-CSharp
     namespaceName: 
     className: GridDraw
@@ -1809,7 +1878,7 @@ ScriptsOnlyBuild:
     className: TextContainer
   - hash:
       serializedVersion: 2
-      Hash: c23039ac41e9a77d8c10e3eb52305812
+      Hash: bd7116eb786f1497d47468b6d529c99f
     assemblyName: Assembly-CSharp
     namespaceName: 
     className: InputManager
@@ -2109,7 +2178,7 @@ ScriptsOnlyBuild:
     className: UnityOnJointBreak2DMessageListener
   - hash:
       serializedVersion: 2
-      Hash: 25c6abd0cfa36f5232bcec22e9b84726
+      Hash: a47c8ebe0944ba71af88b8924a5e910d
     assemblyName: Assembly-CSharp
     namespaceName: 
     className: ShapeListUIManager
